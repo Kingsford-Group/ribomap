@@ -1,1 +1,8 @@
-Document Me!
+# real dataset
+  paper: Guo, Huili, et al. "Mammalian microRNAs predominantly act to decrease target mRNA levels." Nature 466.7308 (2010): 835-840.
+  GEO: GSE22004
+  RNA-seq: GSM546921_filtered_sequence.txt.gz
+  Ribo-seq: GSM546920_filtered_sequence.txt.gz
+
+# data processing pipeline
+ 

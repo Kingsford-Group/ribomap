@@ -29,7 +29,7 @@ int main(int argc, char ** argv)
 
   cout<<"getting transcript info...\n";
   transcript_info tinfo(argv[3], argv[4]);
-  bowtie_best_log(tinfo, bb_bam.c_str(), argv[3], argv[5], bb_log.c_str(),offset);
+  //bowtie_best_log(tinfo, bb_bam.c_str(), argv[3], argv[5], bb_log.c_str(),offset);
   translation_pipeline(tinfo, nodup_bam.c_str(), argv[3], argv[5], ribomap_log.c_str(),offset);
   return 0;
 }
@@ -59,6 +59,7 @@ bool translation_pipeline(const transcript_info& tinfo, const char* bam_fname, c
   for (size_t t=0; t!=rprofile.number_of_transcripts(); ++t) {
     logfile<<"refID: "<<refID_vec[t]<<endl;
     logfile<<"tid: "<<tinfo.get_tid(refID_vec[t])<<endl;
+    logfile<<"tabd: "<<rprofile.get_tot_abundance(t)<<endl;
     logfile<<"rprofile: ";
     print_vec(rprofile.get_read_assignments(t),logfile)<<endl;
   }

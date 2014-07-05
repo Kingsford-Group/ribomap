@@ -50,7 +50,7 @@ def transcript_abundance(forced=False):
         cmd = "sailfish index -t {0} -o {1} -k 20 -p 15 -f".format(transcript_fa, sf_idx_dir)
         print cmd
         os.system(cmd)
-    cmd = 'sailfish quant -l "T=SE:S=U" -i {0} -o {1} -r {2} -p 15 --no_bias_correct -a -f'.format(sf_idx_dir, sf_odir, rnaseq_fq)
+    cmd = 'sailfish quant -l "T=SE:S=U" -i {0} -o {1} -r {2} -p {3} --no_bias_correct -a -f'.format(sf_idx_dir, sf_odir, rnaseq_fq, nproc)
     print cmd
     os.system(cmd)
 
@@ -88,7 +88,7 @@ def align2Bowtie1():
         cmd = "bowtie-build -f {0} {1}{2}".format(transcript_fa, bowtie_idx_dir, ref_core)
         print cmd
         os.system(cmd)
-    cmd = "bowtie -p {0} --chunkmbs 300 -a --best --strata -m 255 -n 2 {1}{2} -f {3}_{4}_nodup_norrna.fa -S | samtools view -bS -o {3}_nodup.bam -".format(nproc, bowtie_idx_dir, ref_core, fasta_core, seedlen)
+    cmd = "bowtie -p {0} --chunkmbs 300 -a --best --strata -m 255 -n 1 {1}{2} -f {3}_{4}_nodup_norrna.fa -S | samtools view -bS -o {3}_nodup.bam -".format(nproc, bowtie_idx_dir, ref_core, fasta_core, seedlen)
     print cmd
     os.system(cmd)
 
@@ -104,7 +104,7 @@ def align2Bowtie1best():
         cmd = "bowtie-build -f {0} {1}{2}".format(transcript_fa,bowtie_idx_dir,ref_core)
         print cmd
         os.system(cmd)
-    cmd = "bowtie -p {0} --chunkmbs 300 --best -m 255 -n 2 {1}{2} -f {3}_{4}_norrna.fa -S | samtools view -bS -o {3}_best.bam -".format(nproc, bowtie_idx_dir, ref_core, fasta_core, seedlen)
+    cmd = "bowtie -p {0} --chunkmbs 300 --best -m 255 -n 1 {1}{2} -f {3}_{4}_norrna.fa -S | samtools view -bS -o {3}_best.bam -".format(nproc, bowtie_idx_dir, ref_core, fasta_core, seedlen)
     print cmd
     os.system(cmd)
 
@@ -160,8 +160,8 @@ if __name__ == "__main__":
     filter_rrna_nodup = lambda: filter_rrna_fa("{0}_{1}_nodup".format(fasta_core,seedlen))
     filter_rrna = lambda: filter_rrna_fa("{0}_{1}".format(fasta_core,seedlen))
     task_list = [ transcript_abundance, trim_fq_merge_dup, filter_rrna_nodup, align2Bowtie1, trim_fq_to_fa, filter_rrna, align2Bowtie1best, run_ribomap]
-    start  = 0
-    end = 8
+    start  = 1
+    end = 7
     mkdirs()
     for task in task_list[start:end]: task()
 

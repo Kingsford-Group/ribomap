@@ -34,7 +34,8 @@ ribo_profile::ribo_profile(const transcript_info& tinfo, const char* sf_fname, d
   int len;
   double tpk, rpkm, kpkm, enk, enr;
   double total_abundance(0);
-  while(ifile >> header >> len >> tpk >> rpkm >> kpkm >> enk >> enr){
+  //while(ifile >> header >> len >> tpk >> rpkm >> kpkm >> enk >> enr){
+  while(ifile >> header >> len >> tpk >> rpkm >> kpkm >> enk){
     size_t i = header.find("|");
     if (i==string::npos){
       cerr<<"invalid transcript header!\n";
