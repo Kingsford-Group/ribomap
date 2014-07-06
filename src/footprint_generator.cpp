@@ -10,12 +10,14 @@ g++ -std=c++11 -I/home/hw1/.local/include -lz -lbz2 -DSEQAN_HAS_ZLIB=1 -DSEQAN_H
 ./footprint_generator ../data/human_mouse_rp_Guo/fasta/all_expressed.fq /data/iGenomes/Homo_sapiens/GenCode/gencode.v18.pc_transcripts_filter.fa /data/iGenomes/Homo_sapiens/GenCode/gencode.v18.annotation.gtf /home/hw1/riboseq/data/human_mouse_rp_Guo/sailfish_quant/quant.sf /home/hw1/riboseq/results/outputs/footprint_generator_logs/footprint_all_expressed.log
 */
 
+#include <string>
 #include <ios>
 #include <iostream>
 #include <fstream>
 #include <chrono>
 #include <cmath>
 #include <numeric>
+#include <boost/filesystem.hpp>
 
 #include "math_utils.hpp"
 #include "gencode_parser.hpp"
@@ -28,7 +30,7 @@ using time_period = chrono::duration<double>;
 int main(int argc, char ** argv)
 {
   if (argc != 6) {
-    cout<< "Usage: ./footprint_generator fastq_fname transcript_fasta gtf_fn sailfish_result log_fname"<<endl;
+    cout<< "Usage: ./footprint_generator odirc ofile_core transcript_fasta gtf_fn sailfish_result"<<endl;
     exit(1);
   }
 
@@ -36,13 +38,13 @@ int main(int argc, char ** argv)
   // cout.precision(3);
   
   cout<<"getting transcript info...\n";
-  transcript_info tinfo(argv[2], argv[3]);
+  transcript_info tinfo(argv[3], argv[4]);
   //profile
   cout<<"constructing profile class...\n";
-  ribo_profile rprofile(tinfo, argv[4]);
+  ribo_profile rprofile(tinfo, argv[5]);
   cout<<"number of transcripts in profile class: "<<rprofile.number_of_transcripts()<<endl;
   //rate
-  ribo_model ribo_rate(argv[2], rprofile, tinfo);
+  ribo_model ribo_rate(argv[3], rprofile, tinfo);
   cout<<"tRNA abundance as elongation rate"<<endl;
   ribo_rate.elongation_rate_from_file("elongation_rate_human.txt");
   cout<<"initiation rate is randomly set to be 100 times smaller than elongation rate range"<<endl;
@@ -51,7 +53,10 @@ int main(int argc, char ** argv)
   // ribo_rate.uniform_initializer(0.5,0.5);
   // log file to store both model profile and actual profile
   cout<<"writing synthetic log..."<<endl;
-  ofstream logfile(argv[5]);
+  boost::filesystem::path p(argv[1]);
+  boost::filesystem::create_directory(p);
+  string log_fname(string(argv[1])+"/"+string(argv[2])+".log");
+  ofstream logfile(log_fname.c_str());
   // logfile.setf(ios::scientific);
   // logfile.precision(3);
   int64_t read_count = 100000000;
@@ -78,7 +83,7 @@ int main(int argc, char ** argv)
   cout<<read_count<<" mRNA fragments are needed. "<<endl;
 
   cout<<"generating synthetic footprints..."<<endl;
-  fasta_reader transcript_fa(argv[2]);
+  fasta_reader transcript_fa(argv[3]);
   vector<string> read_buffer;
   int64_t tot_count(0);
   int plen(0), refID(0), readID(0);
@@ -141,7 +146,8 @@ int main(int argc, char ** argv)
   cout<<"reshuffle reads..."<<endl;
   random_shuffle(read_buffer.begin(), read_buffer.end());
   cout<<"write to fastq file..."<<endl;
-  ofstream ofile(argv[1]);
+  string fq_fname(string(argv[1])+"/"+string(argv[2])+".fq");
+  ofstream ofile(fq_fname.c_str());
   for (auto read: read_buffer)
     ofile<<read;
   ofile.close();
