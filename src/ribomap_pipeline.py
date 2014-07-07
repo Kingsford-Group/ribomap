@@ -161,7 +161,7 @@ if __name__ == "__main__":
     filter_rrna = lambda: filter_rrna_fa("{0}_{1}".format(fasta_core,seedlen))
     task_list = [ transcript_abundance, trim_fq_merge_dup, filter_rrna_nodup, align2Bowtie1, trim_fq_to_fa, filter_rrna, align2Bowtie1best, run_ribomap]
     start  = 1
-    end = 7
+    end = 8
     mkdirs()
     for task in task_list[start:end]: task()
 
