@@ -44,15 +44,15 @@ fasta_core = get_core(riboseq_fq)
 rrna_core = get_core(rrna_fa)
 ref_core = transcript_fa.split("/")[-1].rstrip(".fa")
 
-def transcript_abundance(forced=False):
+def transcript_abundance(forced=True):
     """ transcript abundance estimation from RNA-seq with Sailfish"""
     if forced or len(glob.glob('{0}/*'.format(sf_idx_dir)))==0:
         cmd = "sailfish index -t {0} -o {1} -k 20 -p 15 -f".format(transcript_fa, sf_idx_dir)
         print cmd
-        os.system(cmd)
-    cmd = 'sailfish quant -l "T=SE:S=U" -i {0} -o {1} -r {2} -p {3} --no_bias_correct -a -f'.format(sf_idx_dir, sf_odir, rnaseq_fq, nproc)
+        #os.system(cmd)
+    cmd = 'sailfish quant -l "T=SE:S=U" -i {0} -o {1} -r {2} -p {3} -a -f'.format(sf_idx_dir, sf_odir, rnaseq_fq, nproc)
     print cmd
-    os.system(cmd)
+    #os.system(cmd)
 
 def mkdirs():
     # make directories
@@ -81,7 +81,7 @@ def filter_rrna_fa(fn):
     # bowtie align
     cmd = "bowtie -p {0} {1}{2} -f {3}.fa --un={3}_norrna.fa >/dev/null".format(nproc, bowtie_idx_dir, rrna_core, fn)
     print cmd
-    os.system(cmd)
+    #os.system(cmd)
 
 def align2Bowtie1():
     if len(glob.glob("{0}{1}*".format(bowtie_idx_dir, ref_core)))==0:
@@ -115,8 +115,9 @@ def run_ribomap():
         print cpp_cmp
         os.system(cpp_cmp)
     # Usage: ./ribomap input_dir bam_core transcript_fasta gtf_fn sailfish_result output_dir footprint_offset
-    cpp_cmd = "./{0} {1} {2} {3} {4} {5}quant.sf {6} {7}".format(cpp_exe, tmp_dir, fasta_core, transcript_fa, transcript_gtf, sf_odir,output_dir,offset)
+    cpp_cmd = "./{0} {1} {2} {3} {4} {5}quant_bias_corrected.sf {6} {7}".format(cpp_exe, tmp_dir, fasta_core, transcript_fa, transcript_gtf, sf_odir,output_dir,offset)
     print cpp_cmd
+    exit(1)
     os.system(cpp_cmd)
 
 #=========================================
@@ -160,8 +161,8 @@ if __name__ == "__main__":
     filter_rrna_nodup = lambda: filter_rrna_fa("{0}_{1}_nodup".format(fasta_core,seedlen))
     filter_rrna = lambda: filter_rrna_fa("{0}_{1}".format(fasta_core,seedlen))
     task_list = [ transcript_abundance, trim_fq_merge_dup, filter_rrna_nodup, align2Bowtie1, trim_fq_to_fa, filter_rrna, align2Bowtie1best, run_ribomap]
-    start  = 1
-    end = 8
+    start  = 2
+    end = 4
     mkdirs()
     for task in task_list[start:end]: task()
 

@@ -30,7 +30,7 @@ int main(int argc, char ** argv)
   cout<<"getting transcript info...\n";
   transcript_info tinfo(argv[3], argv[4]);
   translation_pipeline(tinfo, nodup_bam.c_str(), argv[3], argv[5], ribomap_log.c_str(),offset);
-  bowtie_best_log(tinfo, bb_bam.c_str(), argv[3], argv[5], bb_log.c_str(),offset);
+  //bowtie_best_log(tinfo, bb_bam.c_str(), argv[3], argv[5], bb_log.c_str(),offset);
   return 0;
 }
 
