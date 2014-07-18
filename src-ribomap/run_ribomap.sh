@@ -6,7 +6,7 @@ transcript_fa=/data/iGenomes/Homo_sapiens/GenCode/gencode.v18.pc_transcripts_fil
 transcript_gtf=/data/iGenomes/Homo_sapiens/GenCode/gencode.v18.annotation.gtf
 rrna_fa=/home/hw1/riboseq/data/human_mouse_rp_Guo/fasta/rrna_human.fasta
 rnaseq_fq=/home/hw1/riboseq/data/human_mouse_rp_Guo/fasta/GSM546921_filtered_sequence.fq
-riboseq_fq=/home/hw1/riboseq/data/human_mouse_rp_Guo/fasta/all_expressed.fq
+riboseq_fq=/home/hw1/riboseq/data/human_mouse_rp_Guo/fasta/GSM546920_filtered_sequence.fq
 # current working directory
 ribo_dir=/home/hw1/ribomap/
 # bowtie
@@ -57,7 +57,7 @@ ribo_core=${ribo_core%.*}
 # sailfish
 sf_idx_dir="${ribo_dir}"sf_idx/
 sf_odir="${ribo_dir}"sf_quant/
-sf_odir=../test
+sf_odir=../test/
 # folder for teporarily holding intermediate result
 tmp_dir="${ribo_dir}"tmp
 tmp_dir=../test/
@@ -87,7 +87,7 @@ fi
 riboseq_core=${riboseq_fq##*/}
 riboseq_core=${riboseq_core%.*}
 nodup_fa="${tmp_dir}${riboseq_core}_${seedlen}_nodup.fa"
-./merge_fq_to_fa -i ${riboseq_fq} -o ${nodup_fa} -l ${seedlen}
+#./merge_fq_to_fa -i ${riboseq_fq} -o ${nodup_fa} -l ${seedlen}
 #=============================
 # step 3: filter rrna
 #=============================
@@ -98,7 +98,7 @@ if  [[ ! $(ls "${bowtie_idx_dir}${rrna_core}"*) ]];  then
     bowtie-build -f ${rrna_fa} ${bowtie_idx_dir}${rrna_core}
 fi
 ndup_nrrna_fa="${tmp_dir}${riboseq_core}_${seedlen}_nodup_norrna.fa"
-bowtie -p $nproc ${bowtie_idx_dir}${rrna_core} -f ${nodup_fa} --un=${ndup_nrrna_fa} > /dev/null
+#bowtie -p $nproc ${bowtie_idx_dir}${rrna_core} -f ${nodup_fa} --un=${ndup_nrrna_fa} > /dev/null
 #=================================
 # step 4: map riboseq with bowtie
 #=================================
@@ -109,8 +109,8 @@ if  [[ ! $(ls "${bowtie_idx_dir}${transcript_core}"*) ]];  then
     bowtie-build -f ${transcript_fa} ${bowtie_idx_dir}${transcript_core}
 fi
 bam_out="${tmp_dir}${riboseq_core}_nodup.bam"
-bowtie -p $nproc --chunkmbs 300 -a --best --strata -m 255 -n 1 ${bowtie_idx_dir}${transcript_core} -f ${ndup_nrrna_fa} -S | samtools view -bS -o ${bam_out} -
+#bowtie -p $nproc --chunkmbs 300 -a --best --strata -m 255 -n 1 ${bowtie_idx_dir}${transcript_core} -f ${ndup_nrrna_fa} -S | samtools view -bS -o ${bam_out} -
 #=============================
 # step 5: run ribomap
 #=============================
-
+./ribomap --bam ${bam_out} --fasta ${transcript_fa} --gtf ${transcript_gtf} --sf ${sf_odir}quant_bias_corrected.sf --out "${tmp_dir}${riboseq_core}.profile" --offset 15

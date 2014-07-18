@@ -25,3 +25,15 @@ void string_rstrip(const string& suffix, string &input)
   if (i!=0 && i!=string::npos)
     input = input.substr(0,i);
 }
+
+// Function: fileExists
+/**
+    Check if a file exists
+    @param[in] filename - the name of the file to check
+    @return    true if the file exists, else false
+*/
+bool fileExists(const string& filename)
+{
+  struct stat buf;
+  return (stat(filename.c_str(), &buf) != -1);
+}

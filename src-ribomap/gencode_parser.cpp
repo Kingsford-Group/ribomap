@@ -11,8 +11,6 @@ g++ -std=c++11 -I/home/hw1/.local/include/ -lz -lbz2 -DSEQAN_HAS_ZLIB=1 -DSEQAN_
 #include <algorithm>
 #include <cassert>
 
-#include <boost/filesystem.hpp>
-
 #include <seqan/basic.h>
 #include <seqan/file.h>
 #include <seqan/stream.h>
@@ -21,7 +19,6 @@ g++ -std=c++11 -I/home/hw1/.local/include/ -lz -lbz2 -DSEQAN_HAS_ZLIB=1 -DSEQAN_
 #include "gencode_parser.hpp"
 #include "utils.hpp"
 
-namespace fs = boost::filesystem;
 
 int test_case_gencode_parser(int argc, char ** argv)
 {
@@ -62,9 +59,8 @@ int test_case_gencode_parser(int argc, char ** argv)
 
 transcript_info::transcript_info(const char* tfname, const char* gtf_fname, const char* cereal_name)
 {
-  fs::path p(cereal_name);
   // file exists, load in values
-  if (fs::is_regular_file(p) and fs::file_size(p)>0) {
+  if (fileExists(string(cereal_name))) {
     cout<<"read transcripts from object cache\n";
     ifstream is(cereal_name);
     cereal::BinaryInputArchive iarchive(is);

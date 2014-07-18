@@ -13,7 +13,7 @@
 #include <seqan/bam_io.h>
 
 #include "gencode_parser.hpp"
-#include "footprint_assigner.hpp"
+#include "ribomap_profiler.hpp"
 #include "bam_parser.hpp"
 #include "utils.hpp"
 
