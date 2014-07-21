@@ -1,8 +1,18 @@
-# real dataset
+# dataset
   paper: Guo, Huili, et al. "Mammalian microRNAs predominantly act to decrease target mRNA levels." Nature 466.7308 (2010): 835-840.
   GEO: GSE22004
   RNA-seq: GSM546921_filtered_sequence.txt.gz
   Ribo-seq: GSM546920_filtered_sequence.txt.gz
 
-# data processing pipeline
+# pre-request of the cpp code:
+  boost
+  cereal (v1.0.0) http://uscilab.github.io/cereal/
+  seqan (v1.4.1) http://www.seqan.de/
+
+# compile code:
+cd src-ribomap
+make all
+
+# run code:
+./run_ribomap [options]
  

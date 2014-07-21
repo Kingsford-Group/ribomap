@@ -6,7 +6,6 @@
 #include "gencode_parser.hpp"
 #include "ribomap_profiler.hpp"
 #include "bam_parser.hpp"
-#include "math_utils.hpp"
 
 //------function forward declarations-------//
 void usage(ez::ezOptionParser& opt);
