@@ -40,6 +40,22 @@ case $i in
     riboseq_fq="${i#*=}"
     shift
     ;;
+    --rrna_fa=*)
+    rrna_fa="${i#*=}"
+    shift
+    ;;
+    --seedlen=*)
+    seedlen="${i#*=}"
+    shift
+    ;;
+    --offset=*)
+    offset="${i#*=}"
+    shift
+    ;;
+    --nproc=*)
+    nproc="${i#*=}"
+    shift
+    ;;
     *)
             # unknown option
     ;;
@@ -57,7 +73,7 @@ ribo_core=${ribo_core%.*}
 # sailfish
 sf_idx_dir="${ribo_dir}"sf_idx/
 sf_odir="${ribo_dir}"sf_quant/
-sf_odir=../test/
+#sf_odir=../test/
 # folder for teporarily holding intermediate result
 tmp_dir="${ribo_dir}"tmp
 tmp_dir=../test/

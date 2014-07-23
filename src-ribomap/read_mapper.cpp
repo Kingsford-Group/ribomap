@@ -1,6 +1,7 @@
 #include <ios>
 #include <fstream>
 #include <cstdlib>
+#include <numeric>
 
 #include "ezOptionParser.hpp"
 #include "gencode_parser.hpp"
@@ -100,11 +101,16 @@ bool translation_pipeline(const transcript_info& tinfo, const char* bam_fname, c
   // logfile.setf(ios::scientific);
   // logfile.precision(3);
   for (size_t t=0; t!=rprofile.number_of_transcripts(); ++t) {
+    auto& p = rprofile.get_read_assignments(t);
+    double rabd = accumulate(p.begin(),p.end(),double(0));
+    double tabd = rprofile.get_tot_abundance(t);
     logfile<<"refID: "<<refID_vec[t]<<endl;
     logfile<<"tid: "<<tinfo.get_tid(refID_vec[t])<<endl;
-    logfile<<"tabd: "<<rprofile.get_tot_abundance(t)<<endl;
+    logfile<<"rabd: "<<rabd<<endl;
+    logfile<<"tabd: "<<tabd<<endl;
+    logfile<<"te: "<<rabd/tabd<<endl;
     logfile<<"rprofile: ";
-    print_vec(rprofile.get_read_assignments(t),logfile)<<endl;
+    print_vec(p,logfile)<<endl;
   }
   logfile.close();
   return false;
