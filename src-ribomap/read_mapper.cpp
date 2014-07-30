@@ -7,6 +7,7 @@
 #include "gencode_parser.hpp"
 #include "ribomap_profiler.hpp"
 #include "bam_parser.hpp"
+#include "abundance_rank.hpp"
 
 //------function forward declarations-------//
 void usage(ez::ezOptionParser& opt);
@@ -95,7 +96,14 @@ bool translation_pipeline(const transcript_info& tinfo, const char* bam_fname, c
   rprofile.assign_reads();
   cout<<"update count profile..."<<endl;
   rprofile.update_count_profile();
-  cout<<"write results to log..."<<endl;
+  cout<<"rank transcripts..."<<endl;
+  abundance_rank rank(rprofile, tinfo);
+  rank.get_rank(100);
+  string fn(log_fname);
+  size_t i(fn.find_last_of("."));
+  string fn_core(fn.substr(0,i));
+  rank.write_diff_list(fn_core, 10);
+  cout<<"write profile results..."<<endl;
   vector<rid_t> refID_vec(rprofile.get_expressed_transcript_ids());
   ofstream logfile(log_fname);
   // logfile.setf(ios::scientific);
