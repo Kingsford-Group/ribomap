@@ -2,7 +2,7 @@ Overview
 ------
 Ribomap is a package that generates isoform-level ribosome profiles from ribosome profiling data. Ribosome profiling is a recently developed high-throughput sequencing technique that captures approximately 30 bp long ribosome-protected mRNA fragments during translation. Because of alternative splicing and genomic repetitive sequences, a ribosome-protected read may map to many places in the transcriptome, leading to discarded or arbitrary mappings when standard approaches are used. Ribomap addresses this problem by assigning reads to potential origins in the transcriptome proportional to the estimated transcript abundance. This results in a more accurate estimation of the ribosome pileup compared to naive read assignment.
 
-Prerequisites packages
+Prerequisites for Ribomap
 ------
 * [__Sailfish__](http://www.cs.cmu.edu/~ckingsf/software/sailfish/index.html) for transcript abundance estimation
 * [__Bowtie__](http://bowtie-bio.sourceforge.net/index.shtml) for read mapping
@@ -38,6 +38,7 @@ The list of options are as follows:
 * __--nproc__ (default 15) Number of threads can be used by ribomap
 
 One example of using the shell script:
+
     ./run_ribomap.sh --rnaseq=../data/GSM546921_filtered_sequence.fq --riboseq=../data/GSM546920_filtered_sequence.fq
 
 Test case
