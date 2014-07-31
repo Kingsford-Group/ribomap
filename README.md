@@ -36,6 +36,7 @@ One example of using the shell script:
 Test case
 ------
 ### run test case
+
 under the `src` directory, run:
       ./get_data.sh
       ./run_ribomap.sh
@@ -47,6 +48,7 @@ under the `src` directory, run:
 	      4. peptide sequence length less than 3 after getting rid of start and end of the seq
 
 ### test case data sets
+
 * __RNA-seq__ [GSM546921](ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM546nnn/GSM546921/suppl/GSM546921_filtered_sequence.txt.gz)
 * __riboseq__ [GSM546920](ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM546nnn/GSM546920/suppl/GSM546920_filtered_sequence.txt.gz)
 * __human transcriptome reference fasta__ [gencode.v18.pc_transcripts.fa](ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_18/gencode.v18.pc_transcripts.fa.gz)
