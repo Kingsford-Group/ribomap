@@ -1,10 +1,9 @@
 COMPILE.c = $(CXX) $(CXXFLAGS)
 CXX = g++
-CXXFLAGS = -std=c++11 -O3 -Wno-deprecated-declarations
+CXXFLAGS = -std=c++11 -O3 -Wno-deprecated-declarations -DSEQAN_HAS_ZLIB=1 -DSEQAN_HAS_BZIP2=1 
 INC = -I/home/hw1/ribomap/include/ -I/opt/local/include
 CXXFLAGS += $(INC)
-LDFLAGS = -lz -lbz2 -DSEQAN_HAS_ZLIB=1 -DSEQAN_HAS_BZIP2=1 
-CXXFLAGS += $(LDFLAGS)
+LDFLAGS = -lz -lbz2 
 OUTPUT_OPTION = -o $@
 
 all: ribomap merge_fq_to_fa
@@ -16,7 +15,7 @@ merge_fq_to_fa: preprocess_fq.cpp
 	chmod u+x $@
 
 ribomap: read_mapper.o ribomap_profiler.o abundance_rank.o bam_parser.o gencode_parser.o utils.o
-	$(CXX) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(OUTPUT_OPTION) $^ $(LDFLAGS)
 	chmod u+x $@
 
 utils.cpp: utils.hpp
