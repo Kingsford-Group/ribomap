@@ -12,6 +12,7 @@ Compile from Source code
 ### compile
     cd src
     make all
+
 This will generate two executables: 
 * `merge_fq_to_fa`: preprocess the ribosome profiling reads
 * `ribomap`: assign ribosome profiling reads to transcript locations
@@ -19,6 +20,7 @@ This will generate two executables:
 Run Ribomap
 ------
 under the `src` directory, run:
+
       ./run_ribomap.sh [options]
 The list of options are as follows:
 * __--rnaseq__ Input RNA-seq read fastq file for transcript abundance estimation
@@ -43,10 +45,10 @@ under the `src` directory, run:
 
 `get_data.sh` automatically downloads the transcriptome fasta, gtf, a RNA-seq data and a riboseq data. The transcriptome fasta file is preprocessed with a _python_ script `transcript_filter.py` to excludes the following transcript
 
-	      1. transcripts without verified start codon
-	      2. transcripts with stop codon in the middle
-	      3. transcripts with duplicated sequences
-	      4. peptide sequence length less than 3 after getting rid of start and end of the seq
+1. transcripts without verified start codon
+2. transcripts with stop codon in the middle
+3. transcripts with duplicated sequences
+4. peptide sequence length less than 3 after getting rid of start and end of the seq
 
 ### test case data sets
 * __RNA-seq__ [GSM546921](ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM546nnn/GSM546921/suppl/GSM546921_filtered_sequence.txt.gz)
