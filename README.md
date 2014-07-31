@@ -5,9 +5,9 @@ Ribomap is a package that generates isoform-level ribosome profiles from ribosom
 Compile from Source code
 ------
 ### Prerequisites
-* [boost]:(http://www.boost.org/)
-* [cereal (v1.0.0)]:(http://uscilab.github.io/cereal/)
-* [seqan (v1.4.1)]:(http://www.seqan.de/)
+* [boost](http://www.boost.org/)
+* [cereal (v1.0.0)](http://uscilab.github.io/cereal/)
+* [seqan (v1.4.1)](http://www.seqan.de/)
 
 ### compile
     cd src
