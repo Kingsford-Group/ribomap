@@ -10,8 +10,8 @@ Compile from Source code
 * [seqan (v1.4.1)]:(http://www.seqan.de/)
 
 ### compile
-> cd src
-> make all
+    cd src
+    make all
 This will generate two executables: 
 * `merge_fq_to_fa`: preprocess the ribosome profiling reads
 * `ribomap`: assign ribosome profiling reads to transcript locations
