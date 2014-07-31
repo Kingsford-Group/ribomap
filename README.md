@@ -19,15 +19,36 @@ This will generate two executables:
 Run Ribomap
 ------
 under the `src` directory, run:
-> ./run_ribomap [options]
+      ./run_ribomap.sh [options]
+The list of options are as follows:
+* __--rnaseq__ Input RNA-seq read fastq file for transcript abundance estimation
+* __--riboseq__	     Input ribosome profiling (riboseq) read fastq file
+* __--ref_fa__ Input trascriptome reference fasta file
+* __--gtf__ Input transcriptome	  annotation gtf file
+* __--rrna_fa__	(default ribomap/data/rrna_human.fasta) Input ribosome RNA sequence fasta file (human ribosome RNA sequences are included in directory `data`)
+* __--seedlen__ (default 25) Seed length to trim down the riboseq reads
+* __--offset__ (default 15) Offset location in a read that the ribosome P-site maps to
+* __--nproc__ (default 15) Number of threads can be used by ribomap
 
-# dataset
-  paper: Guo, Huili, et al. "Mammalian microRNAs predominantly act to decrease target mRNA levels." Nature 466.7308 (2010): 835-840.
-  GEO: GSE22004
-  RNA-seq: GSM546921_filtered_sequence.txt.gz
-  Ribo-seq: GSM546920_filtered_sequence.txt.gz
+One example of using the shell script:
+    ./run_ribomap.sh --rnaseq=../data/GSM546921_filtered_sequence.fq --riboseq=../data/GSM546920_filtered_sequence.fq
 
+Test case
+------
+### run test case
+under the `src` directory, run:
+      ./get_data.sh
+      ./run_ribomap.sh
 
-# run code:
-./run_ribomap [options]
- 
+`get_data.sh` automatically downloads the transcriptome fasta, gtf, a RNA-seq data and a riboseq data. The transcriptome fasta file is preprocessed with a _python_ script `transcript_filter.py` to excludes the following transcripts:
+1. transcripts without verified start codon
+2. transcripts with stop codon in the middle
+3. transcripts with duplicated sequences
+4. peptide sequence length less than 3 after getting rid of start and end of the seq
+
+### test case data sets
+* __RNA-seq__ [GSM546921](ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM546nnn/GSM546921/suppl/GSM546921_filtered_sequence.txt.gz)
+* __riboseq__ [GSM546920](ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM546nnn/GSM546920/suppl/GSM546920_filtered_sequence.txt.gz)
+* __human transcriptome reference fasta__ [gencode.v18.pc_transcripts.fa](ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_18/gencode.v18.pc_transcripts.fa.gz)
+* __human transcriptome annotation gtf__ [gencode.v18.annotation.gtf](ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_18/gencode.v18.annotation.gtf.gz)
+
