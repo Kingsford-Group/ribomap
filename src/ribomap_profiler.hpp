@@ -20,7 +20,7 @@ struct fp_record;
 using fp_list_t = vector<fp_record>;
 
 //------aliases in this header------//
-using rid_t = unsigned;
+using rid_t = size_t;
 
 //------const------//
 const double EPSILON = 1e-7;
@@ -55,7 +55,10 @@ class ribo_profile{
 public:
   vector<read_count> read_count_list; 
   unordered_map<rid_t, rid_t> refID2pID; //ref index from fasta --> profile index
-  ribo_profile(const transcript_info& tinfo, const char* sf_fname, double abundance_cutoff = 1);
+  ribo_profile(const transcript_info& tinfo, const char* fname, const string& filetype, double abundance_cutoff = 1);
+  void sailfish_parser(const transcript_info& tinfo, const char* sf_fname, double abundance_cutoff);
+  void cufflinks_parser(const transcript_info& tinfo, const char* cl_fname, double abundance_cutoff);
+  void express_parser(const transcript_info& tinfo, const char* ep_fname, double abundance_cutoff);
   bool initialize_read_count(const fp_list_t& fp_codon_list, bool normalize = true);
   vector<rid_t> get_expressed_transcript_ids() const;
   bool is_expressed(rid_t refID) const { return nonzero_abundance_vec[refID]; }

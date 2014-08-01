@@ -57,6 +57,15 @@ int test_case_gencode_parser(int argc, char ** argv)
   return 0;
 }
 
+size_t transcript_info::get_refID(const string& tid) const
+{
+  auto it = tid2refid.find(tid);
+  if (it == tid2refid.end())
+    return tid2refid.size();
+  else
+    return it->second; 
+}
+
 transcript_info::transcript_info(const char* tfname, const char* gtf_fname, const char* cereal_name)
 {
   // file exists, load in values
@@ -134,7 +143,7 @@ bool transcript_info::get_info_from_fasta(const char* tfname)
 
 void transcript_info::build_tid_idx_map()
 {
-  for(int i=0; i!=tlist.size(); ++i)
+  for(size_t i=0; i!=tlist.size(); ++i)
     tid2refid[tlist[i].tid] = i;
 }
 

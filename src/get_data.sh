@@ -14,4 +14,8 @@ done
 echo "filtering transcripts...."
 cd ../src/
 python transcript_filter.py
+echo "getting rid of comment lines in gtf..."
+mv gencode.v18.annotation.gtf gencode.v18.annotation.gtf.bak
+sed '/^#/ d' < gencode.v18.annotation.gtf.bak > gencode.v18.annotation.gtf
+rm gencode.v18.annotation.gtf.bak
 echo "done."

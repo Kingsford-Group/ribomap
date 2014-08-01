@@ -11,7 +11,7 @@
 
 //------function forward declarations-------//
 void usage(ez::ezOptionParser& opt);
-bool translation_pipeline(const transcript_info& tinfo, const char* bam_fname, const char* tfasta_fname, const char* sf_fname, const char* log_fname, int offset);
+bool translation_pipeline(const transcript_info& tinfo, const char* bam_fname, const char* tfasta_fname, const char* fname, const char* log_fname, const string& filetype, int offset);
 
 int main(int argc, const char ** argv)
 {
@@ -36,7 +36,9 @@ int main(int argc, const char ** argv)
   opt.add("", 1, 1, 0, "input bam", "-b", "--bam");
   opt.add("", 1, 1, 0, "transcript fasta", "-f", "--fasta");
   opt.add("", 1, 1, 0, "transcript gtf", "-g", "--gtf");
-  opt.add("", 1, 1, 0, "sailfish result", "-s", "--sf");
+  opt.add("", 0, 1, 0, "sailfish result", "-s", "--sf");
+  opt.add("", 0, 1, 0, "cufflinks result", "-c", "--cl");
+  opt.add("", 0, 1, 0, "express result", "-e", "--ep");
   opt.add("", 1, 1, 0, "output profile", "-o", "--out");
   opt.add("", 1, 1, 0, "footprint P-site offset", "-p", "--offset");
 
@@ -57,18 +59,36 @@ int main(int argc, const char ** argv)
     return 1;
   }
 
-  string bam_fname, transcript_fa, transcript_gtf, sf_fname, ofname;
+  string bam_fname, transcript_fa, transcript_gtf, ifname, ofname, filetype;
   opt.get("-b")->getString(bam_fname);
   opt.get("-f")->getString(transcript_fa);
   opt.get("-g")->getString(transcript_gtf);
-  opt.get("-s")->getString(sf_fname);
+
+  // get at least one transcript abundance file name
+  if (opt.isSet("-s")) {
+    opt.get("-s")->getString(ifname);
+    filetype = "sailfish";
+  }
+  else if (opt.isSet("-c")) {
+    opt.get("-c")->getString(ifname);
+    filetype = "cufflinks";
+  }
+  else if (opt.isSet("-e")) {
+    opt.get("-e")->getString(ifname);
+    filetype = "express";
+  }
+  else {
+    cerr<<"ERROR: no transcript abundance file provided!\n";
+    return 1;
+  }
+    
   opt.get("-o")->getString(ofname);
   int offset;
   opt.get("-p")->getInt(offset);
 
   cout<<"getting transcript info...\n";
   transcript_info tinfo(transcript_fa.c_str(), transcript_gtf.c_str());
-  translation_pipeline(tinfo, bam_fname.c_str(), transcript_fa.c_str(), sf_fname.c_str(), ofname.c_str(),offset);
+  translation_pipeline(tinfo, bam_fname.c_str(), transcript_fa.c_str(), ifname.c_str(), ofname.c_str(), filetype, offset);
   return 0;
 }
 
@@ -79,11 +99,11 @@ void usage(ez::ezOptionParser& opt)
   std::cout << usage;
 }
 
-bool translation_pipeline(const transcript_info& tinfo, const char* bam_fname, const char* tfasta_fname, const char* sf_fname, const char* log_fname, int offset)
+bool translation_pipeline(const transcript_info& tinfo, const char* bam_fname, const char* tfasta_fname, const char* ifname, const char* log_fname, const string& filetype, int offset)
 {
   //profile
   cout<<"constructing profile class...\n";
-  ribo_profile rprofile(tinfo, sf_fname);
+  ribo_profile rprofile(tinfo, ifname, filetype, 0.01);
   cout<<"number of transcripts in profile class: "<<rprofile.number_of_transcripts()<<endl;
   //reads
   cout<<"getting read info...\n";
