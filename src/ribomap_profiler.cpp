@@ -107,38 +107,42 @@ void ribo_profile::cufflinks_parser(const transcript_info& tinfo, const char* cl
     profile[t].tot_abundance /= total_abundance;
 }
 
-void ribo_profile::express_parser(const transcript_info& tinfo, const char* sf_fname, double abundance_cutoff)
+void ribo_profile::express_parser(const transcript_info& tinfo, const char* ep_fname, double abundance_cutoff)
 {
   rid_t pid(0);
-  ifstream ifile(sf_fname);
-  while(ifile.peek() == '#'){
-    string line;
-    getline(ifile,line);
-  }
-  string header;
-  int len;
-  double tpk, rpkm, kpkm, enk, enr;
-  double total_abundance(0);
-  while(ifile >> header >> len >> tpk >> rpkm >> kpkm >> enk >> enr){
-    size_t i = header.find("|");
-    if (i==string::npos){
-      cerr<<"invalid transcript header!\n";
-      exit(1);
+  ifstream ifile(ep_fname);
+  // first line is header description, disgarded. 
+  ifile.ignore(numeric_limits<streamsize>::max(), '\n');
+  string word, tid;
+  int i(0);
+  double fpkm(0), total_abundance(0);
+  while (ifile >> word) {
+    ++i;
+    if (i==2) {
+      size_t id(word.find('|'));
+      if (id!=std::string::npos)
+	tid = word.substr(0,id);
+      else
+	tid = word;
     }
-    if (tpk < abundance_cutoff) continue;
-    string tid(header.substr(0,i));
-    rid_t rid(tinfo.get_refID(tid));
-    int plen(tinfo.cds_pep_len(rid));
-    // total number of (t,i) fragments: #transcript x plen
-    total_abundance += tpk * plen;
-
-    // initialize profile list
-    vector<double> count(plen,0);
-    profile.emplace_back(tprofile{0, count, tpk});
-    refID2pID[rid] = pid++;
-    include_abundant_transcript(rid);
-    //if (profile.size()==40) break;
+    else if (i==11) {
+      try { fpkm = std::stod(word); }
+      catch (const std::out_of_range& oor) { fpkm = 0; }
+      ifile.ignore(numeric_limits<streamsize>::max(), '\n');
+      i = 0;
+      if (fpkm < abundance_cutoff) continue;
+      rid_t rid(tinfo.get_refID(tid));
+      if (rid == tinfo.total_count()) continue;
+      int plen(tinfo.cds_pep_len(rid));
+      total_abundance += fpkm;
+      // initialize profile list
+      vector<double> count(plen,0);
+      profile.emplace_back(tprofile{0, count, fpkm});
+      refID2pID[rid] = pid++;
+      include_abundant_transcript(rid);
+    }
   }
+  ifile.close();
   // normalize abundance
   for (size_t t = 0; t!=profile.size(); ++t)
     profile[t].tot_abundance /= total_abundance;
