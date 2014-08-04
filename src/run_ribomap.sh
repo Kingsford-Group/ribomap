@@ -95,14 +95,14 @@ mkdir -p ${bowtie_idx_dir}
 if [ ! -d "$sf_idx_dir" ]; then
     sailfish index -t ${transcript_fa} -o ${sf_idx_dir} -k 20 -p $nproc -f
 fi
-#sailfish quant -l "T=SE:S=U" -i ${sf_idx_dir} -o ${sf_odir} -r ${rnaseq_fq} -p $nproc -a -f
+sailfish quant -l "T=SE:S=U" -i ${sf_idx_dir} -o ${sf_odir} -r ${rnaseq_fq} -p $nproc -a -f
 #=============================
 # step 2: trim sequences
 #=============================
 riboseq_core=${riboseq_fq##*/}
 riboseq_core=${riboseq_core%.*}
 nodup_fa="${tmp_dir}/${riboseq_core}_${seedlen}_nodup.fa"
-#./merge_fq_to_fa -i ${riboseq_fq} -o ${nodup_fa} -l ${seedlen}
+./merge_fq_to_fa -i ${riboseq_fq} -o ${nodup_fa} -l ${seedlen}
 #=============================
 # step 3: filter rrna
 #=============================
@@ -110,10 +110,10 @@ rrna_core=${rrna_fa##*/}
 rrna_core=${rrna_core%.*}
 if  [[ ! $(ls "${bowtie_idx_dir}${rrna_core}"*) ]];  then
     echo "bowtie index for rrna not exist, build it"
-    #bowtie-build -f ${rrna_fa} ${bowtie_idx_dir}${rrna_core}
+    bowtie-build -f ${rrna_fa} ${bowtie_idx_dir}${rrna_core}
 fi
 ndup_nrrna_fa="${tmp_dir}/${riboseq_core}_${seedlen}_nodup_norrna.fa"
-#bowtie -p $nproc ${bowtie_idx_dir}${rrna_core} -f ${nodup_fa} --un=${ndup_nrrna_fa} > /dev/null
+bowtie -p $nproc ${bowtie_idx_dir}${rrna_core} -f ${nodup_fa} --un=${ndup_nrrna_fa} > /dev/null
 #=================================
 # step 4: map riboseq with bowtie
 #=================================
@@ -121,11 +121,11 @@ transcript_core=${transcript_fa##*/}
 transcript_core=${transcript_core%.*}
 if  [[ ! $(ls "${bowtie_idx_dir}${transcript_core}"*) ]];  then
     echo "bowtie index for transcriptome not exist, build it"
-    #bowtie-build -f ${transcript_fa} ${bowtie_idx_dir}${transcript_core}
+    bowtie-build -f ${transcript_fa} ${bowtie_idx_dir}${transcript_core}
 fi
 bam_out="${tmp_dir}/${riboseq_core}_nodup.bam"
-#bowtie -p $nproc --chunkmbs 300 -a --best --strata -m 255 -n 1 ${bowtie_idx_dir}${transcript_core} -f ${ndup_nrrna_fa} -S | samtools view -bS -o ${bam_out} -
+bowtie -p $nproc --chunkmbs 300 -a --best --strata -m 255 -n 1 ${bowtie_idx_dir}${transcript_core} -f ${ndup_nrrna_fa} -S | samtools view -bS -o ${bam_out} -
 #=============================
 # step 5: run ribomap
 #=============================
-echo "./ribomap --bam ${bam_out} --fasta ${transcript_fa} --gtf ${transcript_gtf} --sf ${sf_odir}quant_bias_corrected.sf --out "${output_dir}/${riboseq_core}.profile" --offset 15"
+./ribomap --bam ${bam_out} --fasta ${transcript_fa} --gtf ${transcript_gtf} --sf ${sf_odir}quant_bias_corrected.sf --out "${output_dir}/${riboseq_core}.profile" --offset 15

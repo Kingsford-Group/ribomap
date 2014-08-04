@@ -18,11 +18,11 @@ ribomap: read_mapper.o ribomap_profiler.o abundance_rank.o bam_parser.o gencode_
 	$(CXX) $(OUTPUT_OPTION) $^ $(LDFLAGS)
 	chmod u+x $@
 
-utils.cpp: utils.hpp
-gencode_parser.cpp: gencode_parser.hpp utils.hpp
-bam_parser.cpp: gencode_parser.hpp ribomap_profiler.hpp bam_parser.hpp utils.hpp
-ribomap_profiler.cpp: gencode_parser.hpp ribomap_profiler.hpp bam_parser.hpp
-abundance_rank.cpp: gencode_parser.hpp ribomap_profiler.hpp abundance_rank.hpp
-preprocess_fq.cpp: ezOptionParser.hpp
-read_mapper.cpp: ezOptionParser.hpp gencode_parser.hpp ribomap_profiler.hpp bam_parser.hpp abundance_rank.hpp
+utils.o: utils.cpp utils.hpp 
+gencode_parser.o: gencode_parser.cpp gencode_parser.hpp utils.hpp
+bam_parser.o: bam_parser.cpp gencode_parser.hpp ribomap_profiler.hpp bam_parser.hpp utils.hpp
+ribomap_profiler.o: ribomap_profiler.cpp gencode_parser.hpp ribomap_profiler.hpp bam_parser.hpp
+abundance_rank.o: abundance_rank.cpp gencode_parser.hpp ribomap_profiler.hpp abundance_rank.hpp
+preprocess_fq.o: preprocess_fq.cpp ezOptionParser.hpp
+read_mapper.o: read_mapper.cpp ezOptionParser.hpp gencode_parser.hpp ribomap_profiler.hpp bam_parser.hpp abundance_rank.hpp
 
