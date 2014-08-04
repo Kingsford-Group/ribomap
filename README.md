@@ -24,7 +24,7 @@ This will generate two executables:
 
 Run Ribomap
 ------
-### Run Ribomap without transcript abundance estimation
+### Run Ribomap with transcript abundance estimation
 `run_ribomap.sh` is a pipeline that takes in the riboseq data and the RNA-seq data and automatically estimates the transcript abundance, then assigns riboseq reads to transcript locations based on the estimated transcript abundance. 
 
 Under the `src` directory, run:
@@ -42,7 +42,9 @@ The list of options are as follows:
 
 One example of using the shell script:
 
-    ./run_ribomap.sh --rnaseq=../data/GSM546921_filtered_sequence.fq --riboseq=../data/GSM546920_filtered_sequence.fq
+    ./run_ribomap.sh  \
+    --rnaseq=../data/GSM546921_filtered_sequence.fq \
+    --riboseq=../data/GSM546920_filtered_sequence.fq
 
 ### Run Ribomap without transcript abundance estimation
 Ribomap supports transcript abundance estimation files from [*Sailfish*](http://www.cs.cmu.edu/~ckingsf/software/sailfish/), [*Cufflinks*](http://cufflinks.cbcb.umd.edu/index.html) and [*eXpress*](http://bio.math.berkeley.edu/eXpress/overview.html). Mapping the ribosome footprint can be performed providing any of the three transcript abundance esitmation files listed above.
@@ -53,18 +55,23 @@ Under the `src` directory, run:
 
 The list of options are as follows:
 
-* __-b|--bam__ Bam file of ribosome footprint read mapping to the transcriptome
-* __-f|--fasta__ Transcriptome reference fasta file
-* __-g|--gtf__ Transcriptome annotation gtf file
-* __-s|--sf__ Transcript abundance estimation produced by Sailfish
-* __-c|--cl__ Transcript abundance estimation produced by Cufflinks
-* __-e|--ep__ Transcript abundance estimation produced by eXpress
-* __-o|--out__ Output file name of the estimated ribosome profile
-* __-p|--offset__ Offset location in a read that the ribosome P-site maps to
+* __-b | --bam__ Bam file of ribosome footprint read mapping to the transcriptome
+* __-f | --fasta__ Transcriptome reference fasta file
+* __-g | --gtf__ Transcriptome annotation gtf file
+* __-s | --sf__ Transcript abundance estimation produced by Sailfish
+* __-c | --cl__ Transcript abundance estimation produced by Cufflinks
+* __-e | --ep__ Transcript abundance estimation produced by eXpress
+* __-o | --out__ Output file name of the estimated ribosome profile
+* __-p | --offset__ Offset location in a read that the ribosome P-site maps to
 
 One example of using the executable:
 
-    ./ribomap --bam ../tmp/GSM546920_filtered_sequence_nodup.bam --fasta ../data/gencode.v18.pc_transcripts_filter.fa --gtf ../data/gencode.v18.annotation.gtf --sf ../sf_quant/quant_bias_corrected.sf --out ../outputs/GSM546920_filtered_sequence.profile --offset 15
+    ./ribomap --bam ../tmp/GSM546920_filtered_sequence_nodup.bam \
+    --fasta ../data/gencode.v18.pc_transcripts_filter.fa \
+    --gtf ../data/gencode.v18.annotation.gtf \
+    --sf ../sf_quant/quant_bias_corrected.sf \
+    --out ../outputs/GSM546920_filtered_sequence.profile \
+    --offset 15
 
 Test case
 ------
