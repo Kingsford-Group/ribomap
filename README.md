@@ -78,19 +78,20 @@ Ribomap output files
 Ribomap produces three output files:
 * _XXX.profile_: The ribosome profiles for the expressed transcripts with other analysis statistics. Each entry of a specific transcript looks like this:
 
-> refID: 425
-> tid: ENST00000234875.4
-> rabd:  1358.65
-> tabd:  3.88878e-07
-> te: 3.49377e+09
-> rprofile: 7 0 0 0 54 0 0 0 1 4 ...
+  > refID: 425
+  > tid: ENST00000234875.4
+  > rabd:  1358.65
+  > tabd:  3.88878e-07
+  > te: 3.49377e+09
+  > rprofile: 7 0 0 0 54 0 0 0 1 4 ...
 
-* __refID__ The transcript fai index in the transcriptome fasta file.
-* __tid__ Transcript ensemble ID.
-* __rabd__ Total ribosome loads, which is the sum of the __rprofile__ vector.
-* __tabd__ Relative transcript abundance per codon (alpha_m) derived from Sailfish’s result.
-*__te__ Relative translational efficiency, which is the ratio between __rabd__ and __tabd__.
-* __rprofile__ Ribosome profile vector of the CDS regions of the transcript. Each number in the vector is the number of ribosome footprints that are estimated to be from the corresponding codon location.
+  
+  * __refID__ The transcript fai index in the transcriptome fasta file.
+  * __tid__ Transcript ensemble ID.
+  * __rabd__ Total ribosome loads, which is the sum of the __rprofile__ vector.
+  * __tabd__ Relative transcript abundance per codon (alpha_m) derived from Sailfish’s result.
+  *__te__ Relative translational efficiency, which is the ratio between __rabd__ and __tabd__.	
+  * __rprofile__ Ribosome profile vector of the CDS regions of the transcript. Each number in the vector is the number of ribosome footprints that are estimated to be from the corresponding codon location.
 
 * _XXX_abundant.list_: A list of transcripts whose total ribosome abundance is more than expected given the transcript abundance. 
 There is one transcript record per row. The columns are defined as follows:
