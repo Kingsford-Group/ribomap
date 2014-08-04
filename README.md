@@ -16,11 +16,12 @@ Compile from Source code
 
 ### Compile
     cd src
-    make all
+    make all INC="-I/opt/local/include"
 
 This will generate two executables: 
 * `merge_fq_to_fa`: preprocess the ribosome profiling reads
 * `ribomap`: assign ribosome profiling reads to transcript locations
+Please add the path for the prerequistite headers with flag `INC="-I<path/to/include/>`
 
 Run Ribomap
 ------
@@ -45,6 +46,8 @@ One example of using the shell script:
     ./run_ribomap.sh  \
     --rnaseq=../data/GSM546921_filtered_sequence.fq \
     --riboseq=../data/GSM546920_filtered_sequence.fq
+
+Please connect the parameter flags and the parameters with `=` (no space in between).
 
 ### Run Ribomap without transcript abundance estimation
 Ribomap supports transcript abundance estimation files from [*Sailfish*](http://www.cs.cmu.edu/~ckingsf/software/sailfish/), [*Cufflinks*](http://cufflinks.cbcb.umd.edu/index.html) and [*eXpress*](http://bio.math.berkeley.edu/eXpress/overview.html). Mapping the ribosome footprint can be performed providing any of the three transcript abundance esitmation files listed above.
@@ -72,6 +75,8 @@ One example of using the executable:
     --sf ../sf_quant/quant_bias_corrected.sf \
     --out ../outputs/GSM546920_filtered_sequence.profile \
     --offset 15
+
+Please connect the parameter flags with the parameters with space.
 
 Ribomap output files
 ------
