@@ -22,7 +22,7 @@ This will generate two executables:
 * `merge_fq_to_fa`: preprocess the ribosome profiling reads
 * `ribomap`: assign ribosome profiling reads to transcript locations
 
-Please add the path for the prerequistite headers with flag `INC="-I<path/to/include/>`
+Please add the path for the prerequistite headers with flag `INC="-I<path/to/include/>"`
 
 Run Ribomap
 ------
