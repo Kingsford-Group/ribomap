@@ -76,7 +76,7 @@ One example of using the executable:
 Ribomap output files
 ------
 Ribomap produces three output files:
-* _XXX.profile_: The ribosome profiles for the expressed transcripts with other analysis statistics. Each entry of a specific transcript looks like this:
+1. _XXX.profile_: The ribosome profiles for the expressed transcripts with other analysis statistics. Each entry of a specific transcript looks like this:
 ~~~~~~
   refID: 425
   tid: ENST00000234875.4
@@ -85,14 +85,14 @@ Ribomap produces three output files:
   te: 3.49377e+09
   rprofile: 7 0 0 0 54 0 0 0 1 4 ...
 ~~~~~~  
-    * __refID__ The transcript fai index in the transcriptome fasta file.
-    * __tid__ Transcript ensemble ID.
-    * __rabd__ Total ribosome loads, which is the sum of the __rprofile__ vector.
-    * __tabd__ Relative transcript abundance per codon (alpha_m) derived from Sailfish’s result.
-    * __te__ Relative translational efficiency, which is the ratio between __rabd__ and __tabd__.	
-    * __rprofile__ Ribosome profile vector of the CDS regions of the transcript. Each number in the vector is the number of ribosome footprints that are estimated to be from the corresponding codon location.
+* __refID__ The transcript fai index in the transcriptome fasta file.
+* __tid__ Transcript ensemble ID.
+* __rabd__ Total ribosome loads, which is the sum of the __rprofile__ vector.
+* __tabd__ Relative transcript abundance per codon (alpha_m) derived from Sailfish’s result.
+* __te__ Relative translational efficiency, which is the ratio between __rabd__ and __tabd__.	
+* __rprofile__ Ribosome profile vector of the CDS regions of the transcript. Each number in the vector is the number of ribosome footprints that are estimated to be from the corresponding codon location.
 
-* _XXX_abundant.list_: A list of transcripts whose total ribosome abundance is more than expected given the transcript abundance. 
+2. _XXX_abundant.list_: A list of transcripts whose total ribosome abundance is more than expected given the transcript abundance. 
 There is one transcript record per row. The columns are defined as follows:
 
 | Column number | Description |
@@ -104,7 +104,7 @@ There is one transcript record per row. The columns are defined as follows:
 | 5 | percentile ranking of the total ribosome footprint count |
 | 6 | difference between the transcript abundance rank and the total ribosome footprint count rank
 
-* _XXX_scarce.list_: A list of transcripts whose total ribosome abundance is less than expected given the transcript abundance.
+3. _XXX_scarce.list_: A list of transcripts whose total ribosome abundance is less than expected given the transcript abundance.
 The file format is the same as _XXX_abundant.list_.
 
 Test case
