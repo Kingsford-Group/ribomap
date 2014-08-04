@@ -4,7 +4,7 @@ Ribomap is a package that generates isoform-level ribosome profiles from ribosom
 
 Prerequisites for Ribomap
 ------
-* [__Sailfish__ (v0.6.3))](http://www.cs.cmu.edu/~ckingsf/software/sailfish/index.html) for transcript abundance estimation
+* [__Sailfish__ (v0.6.3)](http://www.cs.cmu.edu/~ckingsf/software/sailfish/index.html) for transcript abundance estimation
 * [__Bowtie__ (v1.1.0)](http://bowtie-bio.sourceforge.net/index.shtml) for read mapping
 
 Compile from Source code
@@ -14,7 +14,7 @@ Compile from Source code
 * [cereal (v1.0.0)](http://uscilab.github.io/cereal/)
 * [seqan (v1.4.1)](http://www.seqan.de/)
 
-### compile
+### Compile
     cd src
     make all
 
@@ -73,9 +73,43 @@ One example of using the executable:
     --out ../outputs/GSM546920_filtered_sequence.profile \
     --offset 15
 
+Ribomap output files
+------
+Ribomap produces three output files:
+* _XXX.profile_: The ribosome profiles for the expressed transcripts with other analysis statistics. Each entry of a specific transcript looks like this:
+
+  refID: 425
+  tid: ENST00000234875.4
+  rabd:  1358.65
+  tabd:  3.88878e-07
+  te: 3.49377e+09
+  rprofile: 7 0 0 0 54 0 0 0 1 4 ...
+
+    * __refID__ The transcript fai index in the transcriptome fasta file.
+    * __tid__ Transcript ensemble ID.
+    * __rabd__ Total ribosome loads, which is the sum of the __rprofile__ vector.
+    * __tabd__ Relative transcript abundance per codon (alpha_m) derived from Sailfish’s result.
+    *__te__ Relative translational efficiency, which is the ratio between __rabd__ and __tabd__.
+    * __rprofile__ Ribosome profile vector of the CDS regions of the transcript. Each number in the vector is the number of ribosome footprints that are estimated to be from the corresponding codon location.
+
+* _XXX_abundant.list_: A list of transcripts whose total ribosome abundance is more than expected given the transcript abundance. 
+There is one transcript record per row. The columns are defined as follows:
+
+| Column number | Description |
+|---------------|-------------|
+| 1 | transcript Ensembl ID | 
+| 2 | relative transcript abundance |
+| 3 | total ribosome footprint count |
+| 4 | pencentile ranking of the transcript abundance |
+| 5 | percentile ranking of the total ribosome footprint count |
+| 6 | difference between the transcript abundance rank and the total ribosome footprint count rank
+
+* _XXX_scarce.list_: A list of transcripts whose total ribosome abundance is less than expected given the transcript abundance.
+The file format is the same as _XXX_abundant.list_.
+
 Test case
 ------
-### run test case
+### Run test case
 under the `src` directory, run:
 
       ./get_data.sh
@@ -88,7 +122,7 @@ under the `src` directory, run:
 3. transcripts with duplicated sequences
 4. peptide sequence length less than 3 after getting rid of start and end of the seq
 
-### test case data sets
+### Test case data sets
 * __RNA-seq__ [GSM546921](ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM546nnn/GSM546921/suppl/GSM546921_filtered_sequence.txt.gz)
 * __riboseq__ [GSM546920](ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM546nnn/GSM546920/suppl/GSM546920_filtered_sequence.txt.gz)
 * __human transcriptome reference fasta__ [gencode.v18.pc_transcripts.fa](ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_18/gencode.v18.pc_transcripts.fa.gz)
