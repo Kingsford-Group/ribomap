@@ -77,14 +77,14 @@ Ribomap output files
 ------
 Ribomap produces three output files:
 * _XXX.profile_: The ribosome profiles for the expressed transcripts with other analysis statistics. Each entry of a specific transcript looks like this:
-
+~~~~~~
   refID: 425
   tid: ENST00000234875.4
   rabd:  1358.65
   tabd:  3.88878e-07
   te: 3.49377e+09
   rprofile: 7 0 0 0 54 0 0 0 1 4 ...
-  
+~~~~~~  
   * __refID__ The transcript fai index in the transcriptome fasta file.
   * __tid__ Transcript ensemble ID.
   * __rabd__ Total ribosome loads, which is the sum of the __rprofile__ vector.
