@@ -21,6 +21,7 @@ Compile from Source code
 This will generate two executables: 
 * `merge_fq_to_fa`: preprocess the ribosome profiling reads
 * `ribomap`: assign ribosome profiling reads to transcript locations
+
 Please add the path for the prerequistite headers with flag `INC="-I<path/to/include/>`
 
 Run Ribomap
@@ -76,7 +77,7 @@ One example of using the executable:
     --out ../outputs/GSM546920_filtered_sequence.profile \
     --offset 15
 
-Please connect the parameter flags with the parameters with space.
+Please connect the parameter flags and the parameters with ` ` (space).
 
 Ribomap output files
 ------
