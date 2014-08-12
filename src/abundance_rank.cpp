@@ -81,7 +81,14 @@ void abundance_rank::write_diff_list(const string& file_core,int percent_diff)
     auto& t=tlist[i];
     if (t.drank < -percent_diff)
       abd_file<<t.tid<<" "<<t.tabd<<" "<<t.rabd<<" "<<t.trank<<" "<<t.rrank<<" "<<t.drank<<" "<<endl;
-    else if (t.drank > -percent_diff)
+    else
+      break;
+  }
+  for (size_t i=tlist.size()-1; i!=0; --i) {
+    auto& t=tlist[i];
+    if (t.drank > percent_diff)
       scrc_file<<t.tid<<" "<<t.tabd<<" "<<t.rabd<<" "<<t.trank<<" "<<t.rrank<<" "<<t.drank<<" "<<endl;
+    else
+      break;
   }
 }
