@@ -26,7 +26,7 @@ Please add the path for the prerequistite headers with flag `INC="-I<path/to/inc
 
 Run Ribomap
 ------
-### Run Ribomap with transcript abundance estimation
+### Run Ribomap with automatic transcript abundance estimation
 `run_ribomap.sh` is a pipeline that takes in the riboseq data and the RNA-seq data and automatically estimates the transcript abundance, then assigns riboseq reads to transcript locations based on the estimated transcript abundance. 
 
 Under the `src` directory, run:
@@ -50,7 +50,7 @@ One example of using the shell script:
 
 Please connect the parameter flags and the parameters with `=` (no space in between).
 
-### Run Ribomap without transcript abundance estimation
+### Run Ribomap by providing the transcript abundance estimation file
 Ribomap supports transcript abundance estimation files from [*Sailfish*](http://www.cs.cmu.edu/~ckingsf/software/sailfish/), [*Cufflinks*](http://cufflinks.cbcb.umd.edu/index.html) and [*eXpress*](http://bio.math.berkeley.edu/eXpress/overview.html). Mapping the ribosome footprint can be performed providing any of the three transcript abundance esitmation files listed above.
 
 Under the `src` directory, run:
