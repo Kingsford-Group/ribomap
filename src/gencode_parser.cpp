@@ -57,7 +57,7 @@ int test_case_gencode_parser(int argc, char ** argv)
   return 0;
 }
 
-size_t transcript_info::get_refID(const string& tid) const
+rid_t transcript_info::get_refID(const string& tid) const
 {
   auto it = tid2refid.find(tid);
   if (it == tid2refid.end())
@@ -282,21 +282,21 @@ fasta_reader::fasta_reader(const char* fname)
   }
 }
 
-string fasta_reader::read_region(unsigned refID, unsigned start, unsigned stop) const
+string fasta_reader::read_region(rid_t refID, unsigned start, unsigned stop) const
 {
   seqan::CharString seq_seqan;
   if (readRegion(seq_seqan, faiIndex, refID, start, stop)) return "";
   return string(toCString(seq_seqan));
 }
 
-string fasta_reader::read_seq(unsigned refID) const
+string fasta_reader::read_seq(rid_t refID) const
 {
   seqan::CharString seq_seqan;
   if (readSequence(seq_seqan,faiIndex, refID)) return "";
   return string(toCString(seq_seqan));
 }
 
-uint64_t fasta_reader::length(unsigned refID) const
+uint64_t fasta_reader::length(rid_t refID) const
 {
   return sequenceLength(faiIndex, refID);
 }
