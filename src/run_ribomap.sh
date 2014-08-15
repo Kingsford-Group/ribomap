@@ -67,55 +67,6 @@ case $key in
 esac
 done
 
-echo $nproc
-# #=============================
-# # read in command line args
-# # equals separated
-# #=============================
-# for i in "$@"
-# do
-# case $i in
-#     --gtf=*)
-#     transcript_gtf="${i#*=}"
-#     shift
-#     ;;
-#     --ref_fa=*)
-#     transcript_fa="${i#*=}"
-#     shift
-#     ;;
-#     --rnaseq=*)
-#     rnaseq_fq="${i#*=}"
-#     shift
-#     ;;
-#     --riboseq=*)
-#     riboseq_fq="${i#*=}"
-#     shift
-#     ;;
-#     --rrna_fa=*)
-#      rrna_fa="${i#*=}"
-#     shift
-#     ;;
-#     --seedlen=*)
-#     seedlen="${i#*=}"
-#     shift
-#     ;;
-#     --offset=*)
-#     offset="${i#*=}"
-#     shift
-#     ;;
-#     --nproc=*)
-#     nproc="${i#*=}"
-#     shift
-#     ;;
-#     *)
-#             # unknown option
-#     ;;
-# esac
-# done
-# if [[ -n $1 ]]; then
-#     echo "Last line of file specified as non-opt/last argument:"
-#     tail -1 $1
-# fi
 #=============================
 # fill out other variables
 #=============================
