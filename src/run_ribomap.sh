@@ -21,41 +21,44 @@ seedlen=25
 offset=15
 #=============================
 # read in command line args
-# equals separated
+# space separated
 #=============================
-for i in "$@"
+while [[ $# > 1 ]]
 do
-case $i in
-    --gtf=*)
-    transcript_gtf="${i#*=}"
+key="$1"
+shift
+
+case $key in
+    --gtf)
+    transcript_gtf="$1"
     shift
     ;;
-    --ref_fa=*)
-    transcript_fa="${i#*=}"
+    --ref_fa)
+    transcript_fa="$1"
     shift
     ;;
-    --rnaseq=*)
-    rnaseq_fq="${i#*=}"
+    --rnaseq)
+    rnaseq_fq="$1"
     shift
     ;;
-    --riboseq=*)
-    riboseq_fq="${i#*=}"
+    --riboseq)
+    riboseq_fq="$1"
     shift
     ;;
-    --rrna_fa=*)
-    rrna_fa="${i#*=}"
+    --rrna_fa)
+    rrna_fa="$1"
     shift
     ;;
-    --seedlen=*)
-    seedlen="${i#*=}"
+    --seedlen)
+    seedlen="$1"
     shift
     ;;
-    --offset=*)
-    offset="${i#*=}"
+    --offset)
+    offset="$1"
     shift
     ;;
-    --nproc=*)
-    nproc="${i#*=}"
+    --nproc)
+    nproc="$1"
     shift
     ;;
     *)
@@ -63,10 +66,56 @@ case $i in
     ;;
 esac
 done
-if [[ -n $1 ]]; then
-    echo "Last line of file specified as non-opt/last argument:"
-    tail -1 $1
-fi
+
+echo $nproc
+# #=============================
+# # read in command line args
+# # equals separated
+# #=============================
+# for i in "$@"
+# do
+# case $i in
+#     --gtf=*)
+#     transcript_gtf="${i#*=}"
+#     shift
+#     ;;
+#     --ref_fa=*)
+#     transcript_fa="${i#*=}"
+#     shift
+#     ;;
+#     --rnaseq=*)
+#     rnaseq_fq="${i#*=}"
+#     shift
+#     ;;
+#     --riboseq=*)
+#     riboseq_fq="${i#*=}"
+#     shift
+#     ;;
+#     --rrna_fa=*)
+#      rrna_fa="${i#*=}"
+#     shift
+#     ;;
+#     --seedlen=*)
+#     seedlen="${i#*=}"
+#     shift
+#     ;;
+#     --offset=*)
+#     offset="${i#*=}"
+#     shift
+#     ;;
+#     --nproc=*)
+#     nproc="${i#*=}"
+#     shift
+#     ;;
+#     *)
+#             # unknown option
+#     ;;
+# esac
+# done
+# if [[ -n $1 ]]; then
+#     echo "Last line of file specified as non-opt/last argument:"
+#     tail -1 $1
+# fi
 #=============================
 # fill out other variables
 #=============================
