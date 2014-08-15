@@ -1,6 +1,6 @@
 Overview
 ------
-Ribomap is a package that generates isoform-level ribosome profiles from ribosome profiling data. Ribosome profiling is a recently developed high-throughput sequencing technique that captures approximately 30 bp long ribosome-protected mRNA fragments during translation. Because of alternative splicing and genomic repetitive sequences, a ribosome-protected read may map to many places in the transcriptome, leading to discarded or arbitrary mappings when standard approaches are used. Ribomap addresses this problem by assigning reads to potential origins in the transcriptome proportional to the estimated transcript abundance. This results in a more accurate estimation of the ribosome pileup compared to naive read assignment.
+Ribomap is a package that generates isoform-level ribosome profiles from ribosome profiling data. Ribosome profiling is a recently developed high-throughput sequencing technique that captures approximately 30 bp long ribosome-protected mRNA fragments during translation. Because of alternative splicing and genomic repetitive sequences, a ribosome-protected read may map to many places in the transcriptome, leading to discarded or arbitrary mappings when standard approaches are used. Ribomap addresses this problem by assigning reads to potential origins in the transcriptome proportional to the estimated transcript abundance. This results in a more accurate estimation of the ribosome pileup compared to naive read assignments.
 
 Prerequisites for Ribomap
 ------
@@ -15,6 +15,8 @@ Compile from Source code
 * [seqan (v1.4.1)](http://www.seqan.de/)
 
 ### Compile
+a c++ compiler that support c++11 features (for instance g++ >= 4.7) is required.
+
     cd src
     make all INC="-I/opt/local/include"
 
@@ -45,10 +47,10 @@ The list of options are as follows:
 One example of using the shell script:
 
     ./run_ribomap.sh  \
-    --rnaseq=../data/GSM546921_filtered_sequence.fq \
-    --riboseq=../data/GSM546920_filtered_sequence.fq
+    --rnaseq ../data/GSM546921_filtered_sequence.fq \
+    --riboseq ../data/GSM546920_filtered_sequence.fq
 
-Please connect the parameter flags and the parameters with `=` (no space in between).
+Please connect the parameter flags and the parameters with a white space.
 
 #### Run Ribomap by providing the transcript abundance estimation file
 Ribomap supports transcript abundance estimation files from [*Sailfish*](http://www.cs.cmu.edu/~ckingsf/software/sailfish/), [*Cufflinks*](http://cufflinks.cbcb.umd.edu/index.html) and [*eXpress*](http://bio.math.berkeley.edu/eXpress/overview.html). Mapping the ribosome footprint can be performed providing any of the three transcript abundance esitmation files listed above.
@@ -77,7 +79,7 @@ One example of using the executable:
     --out ../outputs/GSM546920_filtered_sequence.profile \
     --offset 15
 
-Please connect the parameter flags and the parameters with ` ` (space).
+Please connect the parameter flags and the parameters with a space.
 
 Ribomap output files
 ------
@@ -124,12 +126,12 @@ under the `src` directory, run:
       ./get_data.sh
       ./run_ribomap.sh
 
-`get_data.sh` automatically downloads the transcriptome fasta, gtf, a RNA-seq data and a riboseq data. The transcriptome fasta file is preprocessed with a _python_ script `transcript_filter.py` to excludes the following transcript
+`get_data.sh` automatically downloads the transcriptome fasta, gtf, a RNA-seq data and a riboseq data. The transcriptome fasta file is preprocessed with a _python_ script `transcript_filter.py` to excludes the following transcripts:
 
 1. transcripts without verified start codon
-2. transcripts with stop codon in the middle
+2. transcripts with stop codon in the middle of the CDS region
 3. transcripts with duplicated sequences
-4. peptide sequence length less than 3 after getting rid of start and end of the seq
+4. peptide sequence length less than 3 when the start and stop codons are not included
 
 ### Test case data sets
 * __RNA-seq__ [GSM546921](ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM546nnn/GSM546921/suppl/GSM546921_filtered_sequence.txt.gz)
