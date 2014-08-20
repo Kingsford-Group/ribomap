@@ -103,7 +103,7 @@ bool translation_pipeline(const transcript_info& tinfo, const char* bam_fname, c
 {
   //profile
   cout<<"constructing profile class...\n";
-  ribo_profile rprofile(tinfo, ifname, filetype, 0.01);
+  ribo_profile rprofile(tinfo, ifname, filetype, 1);
   cout<<"number of transcripts in profile class: "<<rprofile.number_of_transcripts()<<endl;
   //reads
   cout<<"getting read info...\n";

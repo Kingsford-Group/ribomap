@@ -128,4 +128,4 @@ bowtie -p $nproc --chunkmbs 300 -a --best --strata -m 255 -n 1 ${bowtie_idx_dir}
 #=============================
 # step 5: run ribomap
 #=============================
-./ribomap --bam ${bam_out} --fasta ${transcript_fa} --gtf ${transcript_gtf} --sf ${sf_odir}quant_bias_corrected.sf --out "${output_dir}/${riboseq_core}.profile" --offset 15
+./ribomap --bam ${bam_out} --fasta ${transcript_fa} --gtf ${transcript_gtf} --sf ${sf_odir}quant_bias_corrected.sf --out "${output_dir}/${riboseq_core}.profile" --offset ${offset}
