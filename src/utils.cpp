@@ -1,22 +1,30 @@
 #include "utils.hpp"
 using namespace std;
 
+bool startswith(const std::string &prefix, const std::string &input)
+{
+  return input.find(prefix)==0;
+}
+
 void string_split(const string &s, const string& delimiter, vector<string>& words)
 {
   size_t pre_pos = 0;
   size_t pos = 0;
-  while ((pos = s.find(delimiter,pre_pos)) != string::npos) {
+  pos = s.find(delimiter,pre_pos);
+  while (pos != string::npos) {
     words.push_back(s.substr(pre_pos, pos-pre_pos));
     pre_pos = pos+delimiter.size();
+    pos = s.find(delimiter, pre_pos);
   }
-  pos = s.size();
-  words.push_back(s.substr(pre_pos, pos-pre_pos));
+  if (pre_pos != s.size()) {
+    pos = s.size();
+    words.push_back(s.substr(pre_pos, pos-pre_pos));
+  }
 }
 
 void string_lstrip(const string& prefix, string &input)
 {
-  if (input.find(prefix)==0)
-    input.erase(0,prefix.size()); 
+  input.erase(0,prefix.size()); 
 }
 
 void string_rstrip(const string& suffix, string &input)
@@ -24,16 +32,4 @@ void string_rstrip(const string& suffix, string &input)
   int i=input.find(suffix);
   if (i!=0 && i!=string::npos)
     input = input.substr(0,i);
-}
-
-// Function: fileExists
-/**
-    Check if a file exists
-    @param[in] filename - the name of the file to check
-    @return    true if the file exists, else false
-*/
-bool fileExists(const string& filename)
-{
-  struct stat buf;
-  return (stat(filename.c_str(), &buf) != -1);
 }

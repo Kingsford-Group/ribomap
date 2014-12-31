@@ -4,7 +4,7 @@
 #include <numeric>
 
 #include "ezOptionParser.hpp"
-#include "gencode_parser.hpp"
+#include "reference_info_builder.hpp"
 #include "ribomap_profiler.hpp"
 #include "bam_parser.hpp"
 #include "abundance_rank.hpp"

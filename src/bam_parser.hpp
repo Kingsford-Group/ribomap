@@ -36,10 +36,11 @@ using rd_rec_map_t = map<string, fp_record>;
 using fp_list_t = vector<fp_record>;
 
 // function declaration
-bool expressed_read_codon_ranges_from_bam(fp_list_t& fp_codon_list, const char *fn, const transcript_info& tinfo, const ribo_profile& profiler, int offset);
-bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, const ribo_profile& profiler);
+bool expressed_read_codon_ranges_from_bam(fp_list_t& fp_codon_list, const char *fn, const transcript_info& tinfo, const ribo_profile& profiler, int offset, const string& cnt_sep);
+bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, const ribo_profile& profiler, const string& cnt_sep);
 void alignment_regions_to_codon_ranges(const rd_rec_map_t& fp_rec, const transcript_info& tinfo, fp_list_t& fp_codon_list, int offset);
-int base_range_to_middle_codon(const position& bp, int offset, int cds_begin, int cds_end, int phase, position& cp);
+int base_range_to_codon_range(const position& bp, int cds_begin, int cds_end, int phase, position& cp);
+int base_range_to_middle_codon(const position& bp, int cds_begin, int cds_end, int offset, position& cp);
 #endif
 
 

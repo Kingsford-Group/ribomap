@@ -4,10 +4,10 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
-#include <random>
 #include <iostream>
 
 #include <boost/dynamic_bitset.hpp>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -21,10 +21,6 @@ using fp_list_t = vector<fp_record>;
 
 //------aliases in this header------//
 using rid_t = size_t;
-
-//------const------//
-const double EPSILON = 1e-7;
-const unsigned SEED = 619048235;
 
 //------classes------//
 //------profile info per transcript------//
@@ -56,9 +52,6 @@ public:
   vector<read_count> read_count_list; 
   unordered_map<rid_t, rid_t> refID2pID; //ref index from fasta --> profile index
   ribo_profile(const transcript_info& tinfo, const char* fname, const string& filetype, double abundance_cutoff = 1);
-  void sailfish_parser(const transcript_info& tinfo, const char* sf_fname, double abundance_cutoff);
-  void cufflinks_parser(const transcript_info& tinfo, const char* cl_fname, double abundance_cutoff);
-  void express_parser(const transcript_info& tinfo, const char* ep_fname, double abundance_cutoff);
   bool initialize_read_count(const fp_list_t& fp_codon_list, bool normalize = true);
   vector<rid_t> get_expressed_transcript_ids() const;
   bool is_expressed(rid_t refID) const { return nonzero_abundance_vec[refID]; }
@@ -77,16 +70,13 @@ private:
   // bit vector: 1--transcript has non-zero abundance; 0--zero abundance
   boost::dynamic_bitset<> nonzero_abundance_vec; 
   double total_read_count;
+  void sailfish_parser(const transcript_info& tinfo, const char* sf_fname, double abundance_cutoff);
+  void cufflinks_parser(const transcript_info& tinfo, const char* cl_fname, double abundance_cutoff);
+  void express_parser(const transcript_info& tinfo, const char* ep_fname, double abundance_cutoff);
   void reset_read_count();
   void include_abundant_transcript(rid_t refID) { nonzero_abundance_vec.set(refID); }
   void add_read_count(rid_t t, rid_t i, double count) { profile.at(t).count.at(i) += count; }
   void add_tot_count(rid_t t, double count) { profile[t].tot_count += count; }
 };
 
-template<class vector_class>
-ostream& print_vec(vector_class v, ostream& out=cout)
-{
-  for(auto vi:v) out<<vi<<" ";
-  return out;
-}
 #endif

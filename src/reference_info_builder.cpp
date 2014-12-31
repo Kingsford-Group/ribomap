@@ -1,8 +1,3 @@
-/*
-g++ -std=c++11 -I/home/hw1/.local/include/ -lz -lbz2 -DSEQAN_HAS_ZLIB=1 -DSEQAN_HAS_BZIP2=1 -Wno-deprecated-declarations -I/opt/local/include -L/opt/local/lib -lboost_system -lboost_filesystem -O3 -o gencode_parser gencode_parser.cpp utils.cpp
-
-./gencode_parser /data/iGenomes/Homo_sapiens/GenCode/gencode.v18.pc_transcripts_filter.fa /data/iGenomes/Homo_sapiens/GenCode/gencode.v18.pc_translations_filter.fa /data/iGenomes/Homo_sapiens/GenCode/gencode.v18.annotation.gtf
-*/
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -16,45 +11,49 @@ g++ -std=c++11 -I/home/hw1/.local/include/ -lz -lbz2 -DSEQAN_HAS_ZLIB=1 -DSEQAN_
 #include <seqan/stream.h>
 #include <seqan/seq_io.h>
 #include <seqan/gff_io.h>
-#include "gencode_parser.hpp"
+#include "reference_info_builder.hpp"
 #include "utils.hpp"
 
 
-int test_case_gencode_parser(int argc, char ** argv)
+int test_case()
 {
-  if (argc != 4) {
-    cout << "Usage: gencode_parser transcript_fasta peptide_fasta gtf_fname" << endl;
-    return 1;
-  }
-  transcript_info tinfo(argv[1], argv[3]);
-  return 0;
+  const char* tfa("../transcriptome/protein_coding_1000_filtered.fasta");
+  const char* pfa("../transcriptome/protein_coding_trans_filtered.fasta");
+  transcript_info tinfo;
+  tinfo.get_yeast_info_from_fasta(tfa);
+
   for (size_t i=0; i!=tinfo.total_count(); ++i) {
     cout<<tinfo.get_tid(i)<<" "<<tinfo.cds_start(i)<<"-"<<tinfo.cds_stop(i)<<endl;
     if (i>20) break;
   }
   
   // check whether encoding is right
-  fasta_reader transcript_fa(argv[1]), peptide_fa(argv[2]);
+  fasta_reader transcript_fa(tfa), peptide_fa(pfa);
+  cout<<"transcriptome size: "<<tinfo.total_count()<<endl;
   cout<<"check whether encoding is right\n";
-  cout<<tinfo.total_count()<<endl;
   int diff_cnt = 0;
   for (size_t i=0; i!=tinfo.total_count(); ++i){
     int start = tinfo.cds_start(i), stop = tinfo.cds_stop(i);
     int plen = tinfo.cds_pep_len(i);
     if (plen < 3) continue;
     string pconvert, pseq(peptide_fa.read_seq(i)), tseq(transcript_fa.read_region(i,start,stop));
-    encode_peptide(tseq,pconvert);
+    if (encode_peptide(tseq,pconvert)) {
+      cout<<i<<" "<<transcript_fa.transcript_name(i)<<" "<<peptide_fa.transcript_name(i)<<endl;
+      cout<<pseq<<endl;
+      cout<<pconvert<<endl;
+    }
     if (tinfo.phase(i) != 0)
       pconvert = "X"+pconvert;
     if (pseq.compare(pconvert) != 0){
+      cout<<i<<" "<<transcript_fa.transcript_name(i)<<" "<<peptide_fa.transcript_name(i)<<endl;
       cout<<pseq<<endl;
       cout<<pconvert<<endl;
       ++diff_cnt;
     }
-    if (i>100) return 0;
   }
-  cout<<diff_cnt<<endl;
+  cout<<"# transcripts that are encoded differently from the ground truth: "<<diff_cnt<<endl;
   return 0;
+
 }
 
 rid_t transcript_info::get_refID(const string& tid) const
@@ -126,7 +125,7 @@ bool transcript_info::get_info_from_fasta(const char* tfname)
     int start = 0, stop = 0;
     for (auto it = twords.begin()+7; it!=twords.end(); ++it){
       string tmp_wrd = *it;
-      if (tmp_wrd.find("CDS:")==0){
+      if (startswith("CDS:", tmp_wrd)){
 	string_lstrip("CDS:",*it);
 	vector<string> cds_range;
 	string_split(*it, "-", cds_range);
@@ -138,6 +137,42 @@ bool transcript_info::get_info_from_fasta(const char* tfname)
     // cout<<tid<<" "<<gid<<" "<<tname<<" "<<gname<<" "<<start<<"-"<<stop<<endl;
     // if (++i>10) break;
   }
+  return false;
+}
+
+bool transcript_info::get_yeast_info_from_fasta(const char* tfname)
+{
+  ifstream tfile(tfname);
+  if (!tfile.good())
+    return 1;
+  seqan::RecordReader<ifstream, seqan::SinglePass<> > treader(tfile);
+  seqan::CharString theader,tseq;
+  while(!atEnd(treader)){
+    if (readRecord(theader, tseq, treader, seqan::Fasta()) != 0){
+      std::cerr<<"ERROR reading FASTA "<<tfname<<std::endl;
+      return 1;
+    }
+    string theader_str(toCString(theader));
+    string tseq_str(toCString(tseq));
+    vector<string> twords;
+    string_split(theader_str, " ", twords);
+
+    //fill in transcript record:
+    string tid(twords[0]);
+    // get cds range in twords[5]: 'start-end'
+    size_t iend(twords[5].find('-'));
+    int start = stoi(twords[5].substr(0,iend+1));
+    int end = stoi(twords[5].substr(iend+1));
+    end -= (end-start)%3;
+    if (is_start_codon(tseq_str.substr(start,3)))
+      start += 3;
+    if (is_stop_codon(tseq_str.substr(end-3, 3)))
+      end -= 3;
+    int plen = (end-start)/3;
+    int tlen = length(tseq);
+    tlist.emplace_back(tprop(tid, start, end, plen, tlen));
+  }
+  build_tid_idx_map();
   return false;
 }
 
@@ -241,6 +276,7 @@ void transcript_info::adjust_cds_ranges_pepfile(const char* pfname)
     tlist[i].plen = plen;
     tlist[i].start += tlist[i].phase;
     tlist[i].stop = tlist[i].start+plen*3-1;
+    tlist[i].start -= 1; // gencode header is 1-based, fasta reader is 0-based
   }
 }
 
@@ -259,6 +295,7 @@ void transcript_info::adjust_cds_ranges()
     tlist[i].start += 3;
     tlist[i].stop -= 3;
     tlist[i].plen = (tlist[i].stop - tlist[i].start + 1)/3;
+    tlist[i].start -= 1; // gencode header is 1-based, fasta reader is 0-based
   }
 }
 
@@ -300,11 +337,23 @@ uint64_t fasta_reader::length(rid_t refID) const
 {
   return sequenceLength(faiIndex, refID);
 }
-void encode_peptide(const string& tseq, string& pseq)
+
+string fasta_reader::transcript_name(rid_t refID) const
+{
+  return string(toCString(sequenceName(faiIndex, refID)));
+}
+
+bool encode_peptide(const string& tseq, string& pseq)
 {
   for (size_t i=0; i<tseq.size(); i+=3){
     string c(tseq.substr(i,3));
+    if (codon2aa.find(c) == codon2aa.end()) {
+      cout<<c<<endl;
+      return true;
+    }
     string aa(codon2aa.at(c));
     pseq += aa;
   }
+  return false;
 }
+

@@ -11,7 +11,7 @@
 #include <iostream>
 #include <limits> 
 
-#include "gencode_parser.hpp"
+#include "reference_info_builder.hpp"
 #include "ribomap_profiler.hpp"
 #include "bam_parser.hpp"
 
