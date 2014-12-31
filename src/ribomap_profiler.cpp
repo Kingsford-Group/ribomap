@@ -17,7 +17,7 @@
 
 /***
  * class ribo_profile: 
- * store the profile from the model, the expected read assignment, and perform the EM
+ * assign reads according to transcript abundance
  */
 ribo_profile::ribo_profile(const transcript_info& tinfo, const char* fname, const string& filetype, double abundance_cutoff): nonzero_abundance_vec(boost::dynamic_bitset<>(tinfo.total_count())), total_read_count(0)
 {
@@ -41,29 +41,37 @@ void ribo_profile::sailfish_parser(const transcript_info& tinfo, const char* sf_
     string line;
     getline(ifile,line);
   }
-  string header;
-  int len;
-  double tpk, rpkm, kpkm, enk, enr;
-  double total_abundance(0);
-  while(ifile >> header >> len >> tpk >> rpkm >> kpkm >> enk >> enr){
-    size_t i = header.find("|");
-    if (i==string::npos){
-      cerr<<"invalid transcript header!\n";
-      exit(1);
+  string word, tid;
+  int i(0);
+  double tpm(0), total_abundance(0);
+  while(ifile >> word) {
+    ++i;
+    // 1st column: transcript ID
+    if (i==1) {
+      // parse Gencode transcript ID to get the actural ID
+      size_t id(word.find('|'));
+      if (id!= word.npos)
+	tid = word.substr(0,id);
+      else
+	tid = word;
     }
-    if (tpk < abundance_cutoff) continue;
-    string tid(header.substr(0,i));
-    rid_t rid(tinfo.get_refID(tid));
-    int plen(tinfo.cds_pep_len(rid));
-    // total number of (t,i) fragments: #transcript x plen
-    total_abundance += tpk * plen;
-
-    // initialize profile list
-    vector<double> count(plen,0);
-    profile.emplace_back(tprofile{0, count, tpk});
-    refID2pID[rid] = pid++;
-    include_abundant_transcript(rid);
-    //if (profile.size()==40) break;
+    // 3rd column: transcript abundance (tpm: transcript per million)
+    else if (i==3) {
+      try { tpm = std::stod(word); }
+      catch (const std::out_of_range& oor) { tpm = 0; }
+      ifile.ignore(numeric_limits<streamsize>::max(), '\n');
+      i = 0;
+      if (tpm < abundance_cutoff) continue;
+      rid_t rid(tinfo.get_refID(tid));
+      int plen(tinfo.cds_pep_len(rid));
+      // total number of (t,i) fragments: #transcript x plen
+      total_abundance += tpm * plen;
+      // initialize profile list
+      vector<double> count(plen,0);
+      profile.emplace_back(tprofile{0, count, tpm});
+      refID2pID[rid] = pid++;
+      include_abundant_transcript(rid);
+    }
   }
   ifile.close();
   // normalize abundance
@@ -82,8 +90,16 @@ void ribo_profile::cufflinks_parser(const transcript_info& tinfo, const char* cl
   double fpkm(0), total_abundance(0);
   while (ifile >> word) {
     ++i;
-    if (i==1)
-      tid = word;
+    // 1st column: transcript ID
+    if (i==1) {
+      // parse Gencode transcript ID to get the actural ID
+      size_t id(word.find('|'));
+      if (id!= word.npos)
+	tid = word.substr(0,id);
+      else
+	tid = word;
+    }
+    // 10th column: transcript abundance (fpkm)
     else if (i==10) {
       try { fpkm = std::stod(word); }
       catch (const std::out_of_range& oor) { fpkm = 0; }
@@ -118,13 +134,16 @@ void ribo_profile::express_parser(const transcript_info& tinfo, const char* ep_f
   double fpkm(0), total_abundance(0);
   while (ifile >> word) {
     ++i;
+    // 1st column: transcript ID
     if (i==2) {
+      // parse Gencode transcript ID to get the actural ID
       size_t id(word.find('|'));
-      if (id!=std::string::npos)
+      if (id!= word.npos)
 	tid = word.substr(0,id);
       else
 	tid = word;
     }
+    // 11th column: transcript abundance
     else if (i==11) {
       try { fpkm = std::stod(word); }
       catch (const std::out_of_range& oor) { fpkm = 0; }

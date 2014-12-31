@@ -1,7 +1,7 @@
 COMPILE.c = $(CXX) $(CXXFLAGS)
 CXX = g++
 CXXFLAGS = -std=c++11 -O3 -Wno-deprecated-declarations -DSEQAN_HAS_ZLIB=1 -DSEQAN_HAS_BZIP2=1 
-#INC = -I/home/hw1/.local/include/ -I/opt/local/include
+INC = -I/home/hw1/.local/include/ -I/opt/local/include
 CXXFLAGS += $(INC)
 LDFLAGS = -lz -lbz2 
 OUTPUT_OPTION = -o $@
