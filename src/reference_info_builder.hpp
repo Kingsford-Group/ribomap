@@ -4,11 +4,6 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <cereal/access.hpp>
-#include <cereal/archives/binary.hpp>
-#include <cereal/types/string.hpp>
-#include <cereal/types/vector.hpp>
-#include <cereal/types/unordered_map.hpp>
 #include <seqan/seq_io.h>
 #include "utils.hpp"
 
@@ -38,7 +33,7 @@ struct tprop{
   string tname;
   string gname;
   bool strand;
-  int phase;
+  int frame;
   int exon_num;
   int start;
   int stop;
@@ -46,44 +41,33 @@ struct tprop{
   int plen;
   int tlen;
   tprop() {}
-  tprop(string tid, string gid, string tname, string gname, int start, int stop): tid(tid), gid(gid), tname(tname), gname(gname), strand(true), phase(0), exon_num(MAX_EXON_NUM), start(start), stop(stop), chrm(""), plen(0), tlen(0) {}
-  tprop(string tid, int start, int stop, int plen, int tlen): tid(tid), gid(""), tname(""), gname(""), strand(true), phase(0), exon_num(1), start(start), stop(stop), chrm(""), plen(plen), tlen(tlen) {}
-  template<class Archive>
-  void serialize(Archive & archive) {
-    archive(tid, gid, tname, gname, strand, phase, exon_num, start, stop, chrm, plen, tlen);
-  }
-  
-  template<class Archive>
-  static tprop* load_and_allocate( Archive & archive )
-  {
-    tprop tmp;
-    archive(tmp.tid, tmp.gid, tmp.tname, tmp.gname, tmp.strand, tmp.phase, tmp.exon_num, tmp.start, tmp.stop, tmp.chrm, tmp.plen, tmp.tlen);
-    return new tprop(tmp);
-  }
-
+  tprop(string tid, string gid, string tname, string gname, int start, int stop): tid(tid), gid(gid), tname(tname), gname(gname), strand(true), frame(0), exon_num(MAX_EXON_NUM), start(start), stop(stop), chrm(""), plen(0), tlen(0) {}
+  tprop(string tid, int start, int stop, int plen, int tlen): tid(tid), gid(""), tname(""), gname(""), strand(true), frame(0), exon_num(1), start(start), stop(stop), chrm(""), plen(plen), tlen(tlen) {}
 };
 
 class transcript_info{
 public:
   vector<tprop> tlist;
   transcript_info() {};
-  transcript_info(const char* tfname, const char* gtf_fname, const char* cereal_name = "../cache/tlist.cereal");
-  bool get_yeast_info_from_fasta(const char* tfname);
+  transcript_info(const char* tfa, const char* cds_range);
+  void get_gencode_info(const char* tfname, const char* gtf_fname);
   size_t total_count() const { return tlist.size(); }
   rid_t get_refID(const string& tid) const;
   int cds_start(rid_t refID) const { return tlist[refID].start; }
   int cds_stop(rid_t refID) const { return tlist[refID].stop; }
   int cds_pep_len(rid_t refID) const { return tlist[refID].plen;}
+  int tlen(rid_t refID) const { return tlist[refID].tlen; }
   string get_tid(rid_t refID) const { return tlist[refID].tid; }
   string get_gid(rid_t refID) const { return tlist[refID].gid; }
-  int phase(rid_t refID) const { return tlist[refID].phase; }
-  template<class Archive>
-  void serialize(Archive & archive) {
-    archive(tlist, tid2refid);
-  }
+  int frame(rid_t refID) const { return tlist[refID].frame; }
 private:
   tid2refid_t tid2refid;
+  int set_cds_start(rid_t refID, int val) { tlist[refID].start = val; }
+  int set_cds_stop(rid_t refID, int val) { tlist[refID].stop = val; }
+  int set_cds_pep_len(rid_t refID, int val) { tlist[refID].plen = val; }
   bool get_info_from_fasta(const char* tfname);
+  bool get_cds_range(const char* cds_fn);
+  bool get_gencode_info_from_fasta(const char* tfname);
   void build_tid_idx_map();
   bool get_info_from_gtf(const char* gtf_fname);
   void adjust_cds_ranges();

@@ -82,7 +82,7 @@ def compare_pseq(pconvert, pseq, stop_codon):
     for i in xrange(l):
         if pconvert[i] != pseq[i]:
             cset.add((pconvert[i], pseq[i]))
-        return cset
+    return cset
 
 def transcript_codon_check(tfname, pfname, glist, cds_range):
     """

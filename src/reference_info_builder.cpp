@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -15,12 +16,19 @@
 #include "utils.hpp"
 
 
-int test_case()
+int main()
 {
-  const char* tfa("../transcriptome/protein_coding_1000_filtered.fasta");
-  const char* pfa("../transcriptome/protein_coding_trans_filtered.fasta");
-  transcript_info tinfo;
-  tinfo.get_yeast_info_from_fasta(tfa);
+  // const char* tfa("/home/hw1/scratch/ribojamdetector/transcriptome/protein_coding_33_filtered.fasta");
+  // const char* pfa("/home/hw1/scratch/ribojamdetector/transcriptome/protein_coding_trans_33_filtered.fasta");
+  // const char* cds("/home/hw1/scratch/ribojamdetector/transcriptome/cds_range.txt");
+  // const char* tfa("/home/hw1/scratch/ribojamdetector/transcriptome/orf_coding.fasta");
+  // const char* pfa("/home/hw1/scratch/ribojamdetector/transcriptome/orf_trans.fasta");
+  // const char* cds("");
+  const char* tfa("/home/hw1/scratch/ribomap/ref/human/gencode.v21.pc_transcripts_filter.fa");
+  const char* pfa("/home/hw1/scratch/ribomap/ref/human/gencode.v21.pc_translations_filter.fa");
+  const char* cds("/home/hw1/scratch/ribomap/ref/human/gencode.v21.pc_transcripts_cds.txt");
+
+  transcript_info tinfo(tfa, cds);
 
   for (size_t i=0; i!=tinfo.total_count(); ++i) {
     cout<<tinfo.get_tid(i)<<" "<<tinfo.cds_start(i)<<"-"<<tinfo.cds_stop(i)<<endl;
@@ -42,8 +50,11 @@ int test_case()
       cout<<pseq<<endl;
       cout<<pconvert<<endl;
     }
-    if (tinfo.phase(i) != 0)
-      pconvert = "X"+pconvert;
+    if (pseq.front() == 'X')
+      pseq = pseq.substr(1);
+    int l = std::min(pconvert.size(), pseq.size());
+    pconvert = pconvert.substr(0, l);
+    pseq = pseq.substr(0,l);
     if (pseq.compare(pconvert) != 0){
       cout<<i<<" "<<transcript_fa.transcript_name(i)<<" "<<peptide_fa.transcript_name(i)<<endl;
       cout<<pseq<<endl;
@@ -65,29 +76,73 @@ rid_t transcript_info::get_refID(const string& tid) const
     return it->second; 
 }
 
-transcript_info::transcript_info(const char* tfname, const char* gtf_fname, const char* cereal_name)
+transcript_info::transcript_info(const char* tfa, const char* cds_range)
 {
-  // file exists, load in values
-  if (fileExists(string(cereal_name))) {
-    cout<<"read transcripts from object cache\n";
-    ifstream is(cereal_name);
-    cereal::BinaryInputArchive iarchive(is);
-    iarchive(*this);
+  get_info_from_fasta(tfa);
+  build_tid_idx_map();
+  if (cds_range)
+    get_cds_range(cds_range);
+}
+
+bool transcript_info::get_info_from_fasta(const char* tfname)
+{
+  ifstream tfile(tfname);
+  if (!tfile.good())
+    return 1;
+  seqan::RecordReader<ifstream, seqan::SinglePass<> > treader(tfile);
+  seqan::CharString theader,tseq;
+  while(!atEnd(treader)){
+    if (readRecord(theader, tseq, treader, seqan::Fasta()) != 0){
+      std::cerr<<"ERROR reading FASTA "<<tfname<<std::endl;
+      return 1;
+    }
+    stringstream header(string(toCString(theader)));
+    string tid;
+    header>>tid;
+    int tlen = length(tseq);
+    int start(0), end(tlen); // end position have to pass over the last position
+    end -= (end-start)%3; 
+    int plen = (end-start+1)/3;
+    tlist.emplace_back(tprop(tid, start, end, plen, tlen));
   }
-  // file does not exist, save value to file
-  else {
-    cout<<"read in transcriptome\n";
-    get_info_from_fasta(tfname);
-    build_tid_idx_map();
-    cout<<"read in phase\n";
-    get_info_from_gtf(gtf_fname);
-    cout<<"adjust cds ranges\n";
-    adjust_cds_ranges();
-    cout<<"cache does not exist, creat cereal object\n";
-    ofstream os(cereal_name);
-    cereal::BinaryOutputArchive oarchive(os);
-    oarchive(*this);
+  build_tid_idx_map();
+  return false;
+}
+
+void transcript_info::build_tid_idx_map()
+{
+  for(size_t i=0; i!=tlist.size(); ++i)
+    tid2refid[tlist[i].tid] = i;
+}
+
+bool transcript_info::get_cds_range(const char* cds_fn)
+{
+  ifstream ifile(cds_fn);
+  string tid;
+  int start, stop;
+  while(ifile >> tid >> start >> stop) {
+    rid_t rid(get_refID(tid));
+    if (rid==total_count()) {
+      cerr<<tid<<" not found in transcript fasta!\n";
+      continue;
+    }
+    set_cds_start(rid, start);
+    set_cds_stop(rid, stop);
+    set_cds_pep_len(rid, (stop-start+1)/3);
   }
+  ifile.close();
+  return false;
+}
+
+void transcript_info::get_gencode_info(const char* tfname, const char* gtf_fname)
+{
+  cout<<"read in transcriptome\n";
+  get_gencode_info_from_fasta(tfname);
+  build_tid_idx_map();
+  cout<<"read in frame\n";
+  get_info_from_gtf(gtf_fname);
+  cout<<"adjust cds ranges\n";
+  adjust_cds_ranges();
 }
 
 /*
@@ -103,7 +158,7 @@ transcript.fa header:
 8 CDS location in the transcript|
 9 3'-UTR (5'-UTR if reverse strand) location in the transcript
  */
-bool transcript_info::get_info_from_fasta(const char* tfname)
+bool transcript_info::get_gencode_info_from_fasta(const char* tfname)
 {
   ifstream tfile(tfname);
   if (!tfile.good())
@@ -138,48 +193,6 @@ bool transcript_info::get_info_from_fasta(const char* tfname)
     // if (++i>10) break;
   }
   return false;
-}
-
-bool transcript_info::get_yeast_info_from_fasta(const char* tfname)
-{
-  ifstream tfile(tfname);
-  if (!tfile.good())
-    return 1;
-  seqan::RecordReader<ifstream, seqan::SinglePass<> > treader(tfile);
-  seqan::CharString theader,tseq;
-  while(!atEnd(treader)){
-    if (readRecord(theader, tseq, treader, seqan::Fasta()) != 0){
-      std::cerr<<"ERROR reading FASTA "<<tfname<<std::endl;
-      return 1;
-    }
-    string theader_str(toCString(theader));
-    string tseq_str(toCString(tseq));
-    vector<string> twords;
-    string_split(theader_str, " ", twords);
-
-    //fill in transcript record:
-    string tid(twords[0]);
-    // get cds range in twords[5]: 'start-end'
-    size_t iend(twords[5].find('-'));
-    int start = stoi(twords[5].substr(0,iend+1));
-    int end = stoi(twords[5].substr(iend+1));
-    end -= (end-start)%3;
-    if (is_start_codon(tseq_str.substr(start,3)))
-      start += 3;
-    if (is_stop_codon(tseq_str.substr(end-3, 3)))
-      end -= 3;
-    int plen = (end-start)/3;
-    int tlen = length(tseq);
-    tlist.emplace_back(tprop(tid, start, end, plen, tlen));
-  }
-  build_tid_idx_map();
-  return false;
-}
-
-void transcript_info::build_tid_idx_map()
-{
-  for(size_t i=0; i!=tlist.size(); ++i)
-    tid2refid[tlist[i].tid] = i;
 }
 
 /*
@@ -241,14 +254,14 @@ bool transcript_info::get_info_from_gtf(const char* gtf_fname)
 	// update phase
 	if (tlist[id].exon_num > exon_num){
 	  tlist[id].exon_num = exon_num;
-	  tlist[id].phase = record.phase - '0';
+	  tlist[id].frame = record.phase - '0';
 	}// if exon_num update
 	//if (id==10) break;
       }//if find key
     }// if CDS
   }// while not eof
   //for (auto t: tlist)
-  //  cout<<t.tid<<" "<<t.phase<<endl;
+  //  cout<<t.tid<<" "<<t.frame<<endl;
   return false;
 }
 
@@ -270,11 +283,11 @@ void transcript_info::adjust_cds_ranges_pepfile(const char* pfname)
   for (size_t i = 0; i!= tlist.size(); ++i){
     //cout<<tlist[i].tid<<" "<<tlist[i].start<<"-"<<tlist[i].stop;
     int plen = sequenceLength(peptide_fa.faiIndex, i);
-    if (tlist[i].phase!=0)
+    if (tlist[i].frame!=0)
       plen -= 1;
     // adjust cds range based on peptide fasta sequence length
     tlist[i].plen = plen;
-    tlist[i].start += tlist[i].phase;
+    tlist[i].start += tlist[i].frame;
     tlist[i].stop = tlist[i].start+plen*3-1;
     tlist[i].start -= 1; // gencode header is 1-based, fasta reader is 0-based
   }
@@ -285,7 +298,7 @@ void transcript_info::adjust_cds_ranges()
   // fasta_reader trans_fa(tfname);
   for (size_t i = 0; i!= tlist.size(); ++i){
     //cout<<"before adjust: "<<tlist[i].tid<<" "<<tlist[i].start<<"-"<<tlist[i].stop;
-    tlist[i].start += tlist[i].phase;
+    tlist[i].start += tlist[i].frame;
     int tlen = tlist[i].stop - tlist[i].start + 1;
     if (tlen%3 != 0)
       tlist[i].stop -= tlen%3;

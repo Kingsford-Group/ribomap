@@ -82,7 +82,7 @@ def get_gencode_cds_range(transcript_fa, tid2frame, sep=' '):
                     start += frame
                     r = (stop-start+1)%3
                     stop -= r
-                    tid2cds[tid] = (start, stop)
+                    tid2cds[tid] = (start-1, stop)
                     tid2theader[tid] = theader
     tf.close()
     return tid2cds, tid2theader
@@ -140,8 +140,8 @@ def gencode_codon_check(tfname, pfname, glist, tid2cds, sep=' '):
             continue
         start, stop = tid2cds[tid]
         tseq = str(trec.seq)
-        pconvert = encode_peptide(tseq[start-1: stop], codon2aa)
-        if is_start_codon(tseq[start-1:start+2]): Mcnt += 1
+        pconvert = encode_peptide(tseq[start: stop], codon2aa)
+        if is_start_codon(tseq[start:start+3]): Mcnt += 1
         if pconvert.endswith(stop_codon): Ucnt += 1
         if check_mid_stop(pconvert, stop_codon):
             glist[tid] = False
@@ -149,7 +149,7 @@ def gencode_codon_check(tfname, pfname, glist, tid2cds, sep=' '):
         elif check_tseq_dup(tseq, tid, tseq2tids):
             glist[tid] = False
             dup_tid.append(tid)
-        elif peptide_len(tseq[start-1: stop], codon2aa, stop_codon)<3:
+        elif peptide_len(tseq[start: stop], codon2aa, stop_codon)<3:
             glist[tid] = False
             short_tid.append(tid)
         else: 
