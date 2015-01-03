@@ -28,7 +28,7 @@ def build_aa_to_codon(stop):
 def convert_codon_to_aa(aa2codon):
     return {codon:aa for aa in aa2codon for codon in aa2codon[aa]}
 
-def build_codon_to_aa(stop='*'):
+def build_codon_to_aa(stop):
     aa2codon = build_aa_to_codon(stop)
     return convert_codon_to_aa(aa2codon)
 

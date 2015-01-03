@@ -97,6 +97,13 @@ def compare_gencode_pseq(pconvert, pseq):
             cset.add((pconvert[i], pseq[i]))
     return cset
 
+def find_tid_in_pheader(s):
+    words = s.split('|')
+    for w in words:
+        if w.startswith('ENST'):
+            return w
+    return ''
+
 def gencode_codon_check(tfname, pfname, glist, tid2cds, sep=' '):
     """
     exclude :
@@ -113,6 +120,7 @@ def gencode_codon_check(tfname, pfname, glist, tid2cds, sep=' '):
     dup_tid = []
     failed_tid = []
     ccset = set([])
+    tseq2tids = {}
     print "checking transcripts..."
     tfile = open(tfname, "rU")
     pfile = open(pfname, "rU")
@@ -120,8 +128,9 @@ def gencode_codon_check(tfname, pfname, glist, tid2cds, sep=' '):
         twords = trec.id.split('|')
         pwords = prec.id.split('|')
         tid = twords[0]
+        tidp = find_tid_in_pheader(prec.id)
         # make sure transcript id between two files match
-        assert twords[0] == pwords[0] or twords[0] == pwords[1]
+        assert tid == tidp
         # make sure sequence length in header match the real length
         assert len(trec) == int(twords[6]) 
         assert len(prec) == int(pwords[-1])
@@ -169,11 +178,22 @@ def gencode_codon_check(tfname, pfname, glist, tid2cds, sep=' '):
     return glist
 
 def filter_gencode_pfasta(ifa, ofa, glist):
+    """
+    peptide.fa header
+    0 peptide-id -- newer version is like this
+    1 transcript-id|
+    2 gene-id|
+    3 Havana-gene-id (if the gene contains manually annotated transcripts, '-' otherwise)|
+    4 Havana-transcript-id (if this transcript was manually annotated, '-' otherwise)|
+    5 transcript-name|
+    6 gene-name|
+    7 sequence-length
+    """
     print "filtering peptide fasta..."
     ifile = open(ifa, "rU")
     ofile = open(ofa,'w')
     for rec in SeqIO.parse(ifile, "fasta"):
-        tid = rec.id.split('|')[1]
+        tid = find_tid_in_pheader(rec.id)
         if not glist[tid]: continue
         SeqIO.write(rec,ofile, "fasta")
     ifile.close()
@@ -195,10 +215,9 @@ def main():
     if len(sys.argv)!=4:
         print "Usage: python filter_gencode_transcript.py gtf_fname transcript_fa peptide_fa"
         exit(1)
-    global stop_codon, codon2aa, tseq2tids, tid2frame
+    global stop_codon, codon2aa, tid2frame
     stop_codon = 'U'
     codon2aa = build_codon_to_aa(stop_codon)
-    tseq2tids = {}
     gtf_fn = sys.argv[1]
     tfa = sys.argv[2]
     pfa = sys.argv[3]
@@ -214,7 +233,6 @@ def main():
     record_gencode_cds_range(cds_fn, tid2cds, tid2theader, glist)
     filter_fasta(tfa, otfa, glist, '|')
     filter_gencode_pfasta(pfa, opfa, glist)
-    tseq2tids = {}
     gencode_codon_check(otfa, opfa, glist, tid2cds, '|')
 
 if __name__ == "__main__": main()
