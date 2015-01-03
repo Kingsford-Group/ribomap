@@ -63,7 +63,7 @@ def peptide_len(tseq, codon2aa, stop_codon):
     return l
 
 def get_gene_list(fa_fname, sep = ' '):
-    print "get gene name list"
+    print "getting gene name list..."
     glist = {}
     tf = open(fa_fname)
     for line in tf:
