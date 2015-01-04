@@ -15,8 +15,7 @@
 #include "reference_info_builder.hpp"
 #include "utils.hpp"
 
-
-int main()
+int test_case()
 {
   // const char* tfa("/home/hw1/scratch/ribojamdetector/transcriptome/protein_coding_33_filtered.fasta");
   // const char* pfa("/home/hw1/scratch/ribojamdetector/transcriptome/protein_coding_trans_33_filtered.fasta");

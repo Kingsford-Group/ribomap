@@ -7,6 +7,7 @@ work_dir=/home/hw1/scratch/ribomap/
 # references -- required!!! please fill out these lines
 transcript_fa=/home/hw1/scratch/ribojamdetector/transcriptome/protein_coding_33_filtered.fasta
 rrna_fa=/home/hw1/scratch/ribojamdetector/transcriptome/rRNA.fa
+cds_range=/home/hw1/scratch/ribojamdetector/transcriptome/cds_range.txt
 # reads --required!!! please provide fastq reads file names
 rnaseq_fq=/home/hw1/scratch/ribojamdetector/data/fasta/BY_mRNA.fastq.gz
 riboseq_fq=/home/hw1/scratch/ribojamdetector/data/fasta/BY_FP.fastq.gz
@@ -137,6 +138,6 @@ fi
 ribomap_out=${output_dir}/${ribo_core}_norm.profile
 if [ ! -f ${ribomap_out} ]; then
     echo "running riboprof..."
-    ./riboprof --mrnabam ${rna_bam} --ribobam ${ribo_bam} --fasta ${transcript_fa} --sf ${sm_out} --out ${ribomap_out} --offset ${offset}
+    ./riboprof --mrnabam ${rna_bam} --ribobam ${ribo_bam} --fasta ${transcript_fa} --cds_range ${cds_range} --sf ${sm_out} --offset ${offset} --out ${ribomap_out}
     check_file ${ribomap_out} "pipeline failed at ribosome profile generation!"
 fi

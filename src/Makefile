@@ -9,9 +9,9 @@ OUTPUT_OPTION = -o $@
 
 all: riboprof
 clean:
-	rm -f *.o riboprof
+	rm -f *.o riboprof ref_checker
 
-riboprof: ribomap.o ribomap_profiler.o bam_parser.o reference_info_builder.o utils.o abundance_rank.o
+riboprof: read_mapper.o ribomap_profiler.o bam_parser.o reference_info_builder.o utils.o abundance_rank.o
 	$(CXX) $(OUTPUT_OPTION) $^ $(LDFLAGS)
 	chmod u+x $@
 
@@ -19,7 +19,7 @@ ref_checker: reference_info_builder.o utils.o
 	$(CXX) $(OUTPUT_OPTION) $^ $(LDFLAGS)
 	chmod u+x $@
 
-ribomap.o: ribomap.cpp ezOptionParser.hpp reference_info_builder.hpp ribomap_profiler.hpp bam_parser.hpp utils.hpp abundance_rank.hpp
+read_mapper.o: read_mapper.cpp ezOptionParser.hpp reference_info_builder.hpp ribomap_profiler.hpp bam_parser.hpp utils.hpp abundance_rank.hpp
 utils.o: utils.cpp utils.hpp 
 reference_info_builder.o: reference_info_builder.cpp reference_info_builder.hpp utils.hpp
 bam_parser.o: bam_parser.cpp reference_info_builder.hpp ribomap_profiler.hpp bam_parser.hpp utils.hpp

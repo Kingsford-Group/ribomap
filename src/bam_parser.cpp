@@ -25,7 +25,7 @@ void alignment_regions_to_codon_ranges(const rd_rec_map_t& fp_rec, const transcr
       unsigned refID = bp.refID;
       int cds_begin = tinfo.cds_start(refID);
       int cds_end = tinfo.cds_stop(refID);
-      int phase = tinfo.phase(refID);
+      int phase = tinfo.frame(refID);
       position cp;
       int read_type(0); 
       if (offset==-1)
