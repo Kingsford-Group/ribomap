@@ -213,6 +213,7 @@ if [ ! -z "${contaminant_fa}" ] && [ -f ${contaminant_fa} ]; then
     fi
 else
     echo "skipped filter read step."
+    # TODO change rna_nrna_fa file name here
 fi
 #========================================
 # step 3: map to transcriptome
@@ -251,10 +252,12 @@ fi
 #=============================
 ribomap_out=${output_dir}/${ribo_core}.profile
 options="--mrnabam ${rna_bam} --ribobam ${ribo_bam} --fasta ${transcript_fa} --sf ${sm_out} --offset ${offset} --out ${ribomap_out}"
-if [ ! z "${cds_range}" ] && [ -f ${cds_range} ]; then
+if [ ! -z "${cds_range}" ] && [ -f ${cds_range} ]; then
     options+=" --cds_range ${cds_range}"
+fi
+echo "all good until here"
 if [ ! -f ${ribomap_out} ]; then
     echo "running riboprof..."
-    echo "./riboprof options"
+    ./riboprof ${options}
     check_file ${ribomap_out} "pipeline failed at ribosome profile generation!"
 fi
