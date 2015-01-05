@@ -2,31 +2,25 @@
 #=============================
 # default parameters
 #=============================
-# please fill this line out by yourself
-work_dir=/home/hw1/scratch/ribomap/
-# references -- required!!! please fill out these lines
-transcript_fa=/home/hw1/scratch/ribojamdetector/transcriptome/protein_coding_33_filtered.fasta
-rrna_fa=/home/hw1/scratch/ribojamdetector/transcriptome/rRNA.fa
-cds_range=/home/hw1/scratch/ribojamdetector/transcriptome/cds_range.txt
-# reads --required!!! please provide fastq reads file names
-rnaseq_fq=/home/hw1/scratch/ribojamdetector/data/fasta/BY_mRNA.fastq.gz
-riboseq_fq=/home/hw1/scratch/ribojamdetector/data/fasta/BY_FP.fastq.gz
-# default parameters: you can leave them alone
 adapter=CTGTAGGCACCATCAAT
 min_fplen=27
 max_fplen=33
 nproc=15 # threads
 nmismatch=1
-offset=15 # P-site offset
-#==============================
+offset=12 # P-site offset
+#=============================
+# pre-filled parameters
+#=============================
 # preprocess
+work_dir="$(pwd)"
+work_dir=${work_dir%/*}/
 fasta_dir=${work_dir}data/fasta/
 # star index
 star_idx_dir=${work_dir}StarIndex/yeast/
 rrna_idx=${star_idx_dir}contaminant/
 transcript_idx=${star_idx_dir}transcript/
 # star outputs
-tmp_dir=${work_dir}tmp/
+tmp_dir=${work_dir}alignment/
 # star params
 align_params="--seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
 SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS --outSAMprimaryFlag AllBestScore"
@@ -37,6 +31,18 @@ output_dir=${work_dir}outputs
 #=============================
 # functions
 #=============================
+# print error message and usage message
+# quit program if indicated
+# error_msg $error_msg $quit
+error_msg ()
+{
+    echo "$1"
+    if [ "$2" = true ]; then
+	echo "Usage: ./run_ribomap.sh --rnaseq_fq rnaseq.fq.gz --riboseq_fq riboseq.fq.gz --contaminant_fa contaminant.fa --transcript_fa transcript.fa --cds_range cds_range.txt"
+	exit
+    fi
+}
+
 # check whether file generated successfully at each single step
 # quit program if file failed to be generated
 # check_file $file_name $error_msg
@@ -47,6 +53,110 @@ check_file ()
 	exit
     fi
 }
+
+#=============================
+# read in command line args
+# space separated
+#=============================
+while [[ $# > 1 ]]
+do
+    key="$1"
+    shift
+    case $key in
+	--rnaseq_fq)
+	    rnaseq_fq="$1"
+	    shift
+	    ;;
+	--riboseq_fq)
+	    riboseq_fq="$1"
+	    shift
+	    ;;
+	--transcript_fa)
+	    transcript_fa="$1"
+	    shift
+	    ;;
+	--contaminant_fa)
+	    contaminant_fa="$1"
+	    shift
+	    ;;
+	--cds_range)
+	    cds_range="$1"
+	    shift
+	    ;;
+	--work_dir)
+	    work_dir="$1"
+	    shift
+	    ;;
+	--adapter)
+	    adapter="$1"
+	    shift
+	    ;;
+	--min_fplen)
+	    min_fplen="$1"
+	    shift
+	    ;;
+	--max_fplen)
+	    max_fplen="$1"
+	    shift
+	    ;;
+	--nproc)
+	    nproc="$1"
+	    shift
+	    ;;
+	--nmismatch)
+	    nmismatch="$1"
+	    shift
+	    ;;
+	--offset)
+	    offset="$1"
+	    shift
+	    ;;
+	--fasta_dir)
+	    fasta_dir="$1"
+	    shift
+	    ;;
+	--star_idx_dir)
+	    star_idx_dir="$1"
+	    rrna_idx=${star_idx_dir}contaminant/
+	    transcript_idx=${star_idx_dir}transcript/
+	    shift
+	    ;;
+	--alignment_dir)
+	    tmp_dir="$1"
+	    shift
+	    ;;
+	--sailfish_dir)
+	    sm_odir="$1"
+	    shift
+	    ;;
+	--output_dir)
+	    output_dir="$1"
+	    shift
+	    ;;
+	*)
+            # unknown option
+	    ;;
+    esac
+done
+
+if [ -z "${riboseq_fq}" ]; then 
+    error_msg "ribo-seq reads not provided!" true
+elif [ ! -f ${riboseq_fq} ]; then
+    error_msg "ribo-seq file not exist! ${riboseq_fq}" true
+elif [ -z "${rnaseq_fq}" ]; then
+    error_msg "RNA-seq reads not provided!" true
+elif [ ! -f ${rnaseq_fq} ]; then
+    error_msg "RNA-seq file not exist! ${rnaseq_fq}" true
+elif [ -z "${contaminant_fa}" ]; then
+    error_msg "contaminant fasta not provided! Filter step skipped." false
+elif [ ! -f ${contaminant_fa} ]; then
+    error_msg "contaminant fasta not exist! ${contaminant_fa}" false
+elif [ -z "${cds_range}" ]; then
+    error_msg "cds range not provided! assume transcript fasta only contain cds regions." false
+elif [ ! -f ${cds_range} ]; then
+    error_msg "cds range file not exist! ${cds_range}" false
+fi
+
 #=============================
 # make directories
 #=============================
@@ -84,27 +194,31 @@ ornaprefix=${tmp_dir}${rna_core}_rrna_
 oriboprefix=${tmp_dir}${ribo_core}_rrna_
 rna_nrrna_fa=${ornaprefix}Unmapped.out.mate1
 ribo_nrrna_fa=${oriboprefix}Unmapped.out.mate1
-echo "filtering contaminated reads"
-if  [ ! -d ${rrna_idx} ];  then
-    echo "building contaminant index..."
-    mkdir -p ${rrna_idx}
-    STAR --runThreadN $nproc --runMode genomeGenerate --genomeDir ${rrna_idx} --genomeFastaFiles ${rrna_fa} --genomeSAindexNbases 5 --genomeChrBinNbits 11
-fi
-if  [ ! -f ${rna_nrrna_fa} ];  then
-    echo "filtering contaminants in RNA_seq..."
-    STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${rna_fa} --outFileNamePrefix ${ornaprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${align_params} > /dev/null
-    check_file ${rna_nrrna_fa} "pipeline failed at filtering rrna in RNA_seq!"
-fi
-if  [ ! -f ${ribo_nrrna_fa} ];  then
-    echo "filtering contaminants in ribo_seq..."
-    STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${ribo_fa} --outFileNamePrefix ${oriboprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${align_params} > /dev/null
-    check_file ${ribo_nrrna_fa} "pipeline failed at filtering rrna in ribo_seq!"
+if [ ! -z "${contaminant_fa}" ] && [ -f ${contaminant_fa} ]; then
+    echo "filtering contaminated reads"
+    if  [ ! -d ${rrna_idx} ];  then
+	echo "building contaminant index..."
+	mkdir -p ${rrna_idx}
+	STAR --runThreadN $nproc --runMode genomeGenerate --genomeDir ${rrna_idx} --genomeFastaFiles ${contaminant_fa} --genomeSAindexNbases 5 --genomeChrBinNbits 11
+    fi
+    if  [ ! -f ${rna_nrrna_fa} ];  then
+	echo "filtering contaminants in RNA_seq..."
+	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${rna_fa} --outFileNamePrefix ${ornaprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${align_params} > /dev/null
+	check_file ${rna_nrrna_fa} "pipeline failed at filtering rrna in RNA_seq!"
+    fi
+    if  [ ! -f ${ribo_nrrna_fa} ];  then
+	echo "filtering contaminants in ribo_seq..."
+	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${ribo_fa} --outFileNamePrefix ${oriboprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${align_params} > /dev/null
+	check_file ${ribo_nrrna_fa} "pipeline failed at filtering rrna in ribo_seq!"
+    fi
+else
+    echo "skipped filter read step."
 fi
 #========================================
 # step 3: map to transcriptome
 #========================================
-ornaprefix=${tmp_dir}${rna_core}_transcriptb_
-oriboprefix=${tmp_dir}${ribo_core}_transcriptb_
+ornaprefix=${tmp_dir}${rna_core}_transcript_
+oriboprefix=${tmp_dir}${ribo_core}_transcript_
 rna_bam=${ornaprefix}Aligned.out.bam
 ribo_bam=${oriboprefix}Aligned.out.bam
 echo "aligning reads to transcriptome"
@@ -135,9 +249,12 @@ fi
 #=============================
 # step 5: run ribomap
 #=============================
-ribomap_out=${output_dir}/${ribo_core}_norm.profile
+ribomap_out=${output_dir}/${ribo_core}.profile
+options="--mrnabam ${rna_bam} --ribobam ${ribo_bam} --fasta ${transcript_fa} --sf ${sm_out} --offset ${offset} --out ${ribomap_out}"
+if [ ! z "${cds_range}" ] && [ -f ${cds_range} ]; then
+    options+=" --cds_range ${cds_range}"
 if [ ! -f ${ribomap_out} ]; then
     echo "running riboprof..."
-    ./riboprof --mrnabam ${rna_bam} --ribobam ${ribo_bam} --fasta ${transcript_fa} --cds_range ${cds_range} --sf ${sm_out} --offset ${offset} --out ${ribomap_out}
+    echo "./riboprof options"
     check_file ${ribomap_out} "pipeline failed at ribosome profile generation!"
 fi
