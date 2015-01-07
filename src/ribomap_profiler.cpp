@@ -13,7 +13,6 @@
 
 #include "reference_info_builder.hpp"
 #include "ribomap_profiler.hpp"
-#include "bam_parser.hpp"
 
 /***
  * class ribo_profile: 
@@ -68,7 +67,7 @@ void ribo_profile::sailfish_parser(const transcript_info& tinfo, const char* sf_
       total_abundance += tpm * plen;
       // initialize profile list
       vector<double> count(plen,0);
-      profile.emplace_back(tprofile{0, count, tpm});
+      profile.emplace_back(tprofile{0, count, tpm, map<read_t, double>{{UNKNOWN, tpm}, {FRAME0, tpm}}});
       refID2pID[rid] = pid++;
       include_abundant_transcript(rid);
     }
@@ -165,6 +164,46 @@ void ribo_profile::express_parser(const transcript_info& tinfo, const char* ep_f
   // normalize abundance
   for (size_t t = 0; t!=profile.size(); ++t)
     profile[t].tot_abundance /= total_abundance;
+}
+
+bool ribo_profile::assign_reads(const fp_list_t& fp_base_list, const unordered_set<int>& type_set)
+{
+  for (auto r: fp_base_list) {
+    // round 1: get candidate alignment loci
+    vector<position> loci;
+    for (auto loc: r.al_loci) {
+      rid_t refID(loc.refID); //transcript index
+      rid_t t(get_transcript_index(refID));
+      if (loc.start<0 or loc.stop>len(t)) {
+        cout<<"profile index out of bound! readID:"<<*r.seqs.begin()<<" ";
+        cout<<r.al_loci.size()<<" "<<refID<<" "<<loc.start<<"-"<<loc.stop<<" "<<len(t)<<endl;
+        continue;
+      }
+      if (type_set.find(loc.type)!=type_set.end())
+	loci.emplace_back(loc);
+    } // for r.al_loci
+    // round 2: get transcript abundance
+    vector<double> prob(loci.size(), 0);
+    double tot_prob(0);
+    for (size_t i=0; i!=prob.size(); ++i) {
+      const position& loc(loci[i]);
+      rid_t refID(loc.refID);
+      rid_t t(get_transcript_index(refID));
+      prob[i] = get_prob(t, loc.type);
+      tot_prob += prob[i];
+    }
+    // round 3: asign reads to loci proportional to loci prob
+    for (size_t i=0; i!=prob.size(); ++i) {
+      const position& loc(loci[i]);
+      rid_t refID(loc.refID);
+      rid_t t(get_transcript_index(refID));
+      double count = r.count * prob[i] / tot_prob;
+      for (rid_t base = loc.start; base != loc.stop; ++base) 
+	add_read_count(t,base, count);
+      add_tot_count(t, count);
+    }
+  }// for r: fp_base_list
+  return false;
 }
 
 bool ribo_profile::initialize_read_count(const fp_list_t&  fp_codon_list, bool normalize)
