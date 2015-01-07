@@ -78,6 +78,33 @@ void assign_P_site(const rd_rec_map_t& fp_rec_in, const transcript_info& tinfo, 
   printf("total: %.0f\tmulti_mapped: %.0f (%.2f %%)\n",total, multi_mapped, multi_mapped*100/total);
 }
 
+void assign_P_site(const rd_rec_map_t& fp_rec_in, const transcript_info& tinfo, fp_list_t& fp_rec_out, rlen2psite_t rl2p)
+{
+  for (auto& ifp: fp_rec_in){
+    vector<position> obp_list;
+    for (auto& ibp: ifp.second.al_loci){
+      unsigned refID = ibp.refID;
+      int cds_begin = tinfo.cds_start(refID);
+      int cds_end = tinfo.cds_stop(refID);
+      position obp(ibp);
+      auto it = rl2p.find(ibp.stop-ibp.start);
+      if (it==rl2p.end()) continue;
+      read_type_of_psite(ibp, cds_begin, cds_end, it->second, obp);
+      obp_list.push_back(obp);
+    }
+    fp_rec_out.emplace_back(fp_record{ifp.second.count, obp_list, ifp.second.seqs});
+  }
+  // sanity check whether fp_rec is the same as bam summary
+  double total=0, multi_mapped=0;
+  for (auto rec: fp_rec_out){
+    total += rec.count;
+    if (rec.al_loci.size()>1)
+      multi_mapped += rec.count;
+  }
+  cout<<"total output footprint: "<<fp_rec_out.size()<<endl;
+  printf("total: %.0f\tmulti_mapped: %.0f (%.2f %%)\n",total, multi_mapped, multi_mapped*100/total);
+}
+
 /* assign read type based on read range to output position and return read type */
 read_t read_type_from_range(const position& ibp, int cds_begin, int cds_end, position& obp)
 {
@@ -194,6 +221,41 @@ bool expressed_read_codon_ranges_from_bam(fp_list_t& fp_codon_list, const char *
   cout<<"convert read loci to codon ranges...\n";
   alignment_regions_to_codon_ranges(rd_rec, tinfo, fp_codon_list, offset);
   return false;
+}
+
+bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, const char* offset_fn, const string& cnt_sep)
+{
+  cout<<"getting readlen mapping to P site offset..."<<endl;
+  rlen2psite_t rl2p = get_readlen_psite_map(offset_fn);
+  cout<<"getting alignment records..."<<endl;
+  rd_rec_map_t rd_rec;
+  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep);
+  cout<<"total number of reads: "<<rd_rec.size()<<endl;
+  cout<<"getting read type and p-sites...\n";
+  assign_P_site(rd_rec, tinfo, fp_rec_out, rl2p);
+  return false;
+}
+
+bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, int offset, const string& cnt_sep)
+{
+  cout<<"getting alignment records..."<<endl;
+  rd_rec_map_t rd_rec;
+  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep);
+  cout<<"total number of reads: "<<rd_rec.size()<<endl;
+  cout<<"getting read type and p-sites...\n";
+  assign_P_site(rd_rec, tinfo, fp_rec_out, offset);
+  return false;
+}
+
+rlen2psite_t get_readlen_psite_map(const char* offset_fn)
+{
+  ifstream ifile(offset_fn);
+  rlen2psite_t rl2p;
+  int readlen, offset;
+  while(ifile >> readlen >> offset)
+    rl2p[readlen] = offset;
+  ifile.close();
+  return rl2p;
 }
 
 int get_count_from_fasta_header(const string header, const string& sep="_")
