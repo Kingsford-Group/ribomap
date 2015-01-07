@@ -27,18 +27,18 @@ void alignment_regions_to_codon_ranges(const rd_rec_map_t& fp_rec, const transcr
       int cds_end = tinfo.cds_stop(refID);
       int phase = tinfo.frame(refID);
       position cp;
-      int read_type(0); 
+      cp.type = FRAME0;
+      read_t read_type; 
       if (offset==-1)
 	read_type = base_range_to_codon_range(bp, cds_begin, cds_end, phase, cp);
       else
 	read_type = base_range_to_middle_codon(bp, cds_begin, cds_end, offset, cp);
-      if (read_type == CDS)
+      if (read_type == FRAME0)
 	codon_list.push_back(cp);
     }
     if (codon_list.size()!=0)
       fp_codon_list.emplace_back(fp_record{fp.second.count, codon_list, fp.second.seqs});
   }
-
   // sanity check whether fp_rec is the same as bam summary
   double total=0, multi_mapped=0;
   for (auto rec: fp_codon_list){
@@ -50,15 +50,86 @@ void alignment_regions_to_codon_ranges(const rd_rec_map_t& fp_rec, const transcr
   printf("total: %.0f\tmulti_mapped: %.0f (%.2f %%)\n",total, multi_mapped, multi_mapped*100/total);
 }
 
+void assign_P_site(const rd_rec_map_t& fp_rec_in, const transcript_info& tinfo, fp_list_t& fp_rec_out, int offset)
+{ 
+  for (auto& ifp: fp_rec_in){
+    vector<position> obp_list;
+    for (auto& ibp: ifp.second.al_loci){
+      unsigned refID = ibp.refID;
+      int cds_begin = tinfo.cds_start(refID);
+      int cds_end = tinfo.cds_stop(refID);
+      position obp(ibp);
+      if (offset==-1)
+	read_type_from_range(ibp, cds_begin, cds_end, obp);
+      else
+	read_type_of_psite(ibp, cds_begin, cds_end, offset, obp);
+      obp_list.push_back(obp);
+    }
+    fp_rec_out.emplace_back(fp_record{ifp.second.count, obp_list, ifp.second.seqs});
+  }
+  // sanity check whether fp_rec is the same as bam summary
+  double total=0, multi_mapped=0;
+  for (auto rec: fp_rec_out){
+    total += rec.count;
+    if (rec.al_loci.size()>1)
+      multi_mapped += rec.count;
+  }
+  cout<<"total output footprint: "<<fp_rec_out.size()<<endl;
+  printf("total: %.0f\tmulti_mapped: %.0f (%.2f %%)\n",total, multi_mapped, multi_mapped*100/total);
+}
+
+/* assign read type based on read range to output position and return read type */
+read_t read_type_from_range(const position& ibp, int cds_begin, int cds_end, position& obp)
+{
+  obp.type = FRAME0;
+  if (ibp.start < cds_begin)
+    obp.type =  UTR5;
+  else if (ibp.stop > cds_end)
+    obp.type = UTR3;
+  return obp.type;
+}
+
+/* get P-site from reads, asign read type based on P-site, and return read type */
+read_t read_type_of_psite(const position& ibp, int cds_begin, int cds_end, int offset, position& obp)
+{
+  int psite = ibp.start + offset;
+  // transcripts on the reverse complement strand has been flipped
+  // therefore no need to consider the transcript strand
+  if (psite < cds_begin)
+    obp.type =  UTR5;
+  // last codon position --> last base - 1 (zero index)
+  else if (psite > cds_end-1)
+    obp.type = UTR3;
+  else {
+    switch ((psite-cds_begin)%3) {
+    case 0:
+      obp.type = FRAME0;
+      break;
+    case 1:
+      obp.type = FRAME1;
+      break;
+    case 2:
+      obp.type = FRAME2;
+      break;
+    }
+  }
+  obp.start = psite;
+  obp.stop = obp.start+1;
+  return obp.type;
+}
+
 /*convert read mapping of transcript DNA base ranges to codon ranges */
-int base_range_to_codon_range(const position& bp, int cds_begin, int cds_end, int phase, position& cp)
+read_t base_range_to_codon_range(const position& bp, int cds_begin, int cds_end, int phase, position& cp)
 {
   //both alignment and codon_position are zero-based
   int pos_begin = bp.start;
   int pos_end = bp.stop;
-  if ((pos_end <= cds_begin and bp.strand) or (pos_begin >= cds_end and !bp.strand))
+  // transcripts on the reverse complement strand has been flipped
+  // therefore no need to consider the transcript strand
+  if (pos_end < cds_begin)
     return UTR5;
-  else if ((pos_end <= cds_begin and !bp.strand) or (pos_begin >= cds_end and bp.strand))
+  // last codon position --> last base - 1 (zero index)
+  else if (pos_begin > cds_end-1)
     return UTR3;
   else {
     // only consider read range within the cds
@@ -76,13 +147,12 @@ int base_range_to_codon_range(const position& bp, int cds_begin, int cds_end, in
     cp.refID = bp.refID;
     cp.start = codon_begin;
     cp.stop = codon_end;
-    cp.strand = bp.strand;
-    return CDS;
+    return FRAME0;
   }
 }
 
 /*convert read mapping of transcript DNA base ranges to the middle codon */
-int base_range_to_middle_codon(const position& bp, int cds_begin, int cds_end, int offset, position& cp)
+read_t base_range_to_middle_codon(const position& bp, int cds_begin, int cds_end, int offset, position& cp)
 {
   int middle = bp.start + offset;
   // transcripts on the reverse complement strand has been flipped
@@ -97,6 +167,7 @@ int base_range_to_middle_codon(const position& bp, int cds_begin, int cds_end, i
   switch ((middle-cds_begin)%3) {
   case 2:
     codon_begin = (middle-cds_begin)/3 + 1;
+    break;
   case 0:
   case 1:
   default:
@@ -110,8 +181,7 @@ int base_range_to_middle_codon(const position& bp, int cds_begin, int cds_end, i
     cp.refID = bp.refID;
     cp.start = codon_begin;
     cp.stop = codon_end;
-    cp.strand = bp.strand;
-    return CDS;
+    return FRAME0;
   }
 }
 
@@ -156,7 +226,7 @@ bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, con
       // get read name and sequence
       string name(toCString(bam_rec.qName));
       string seq(toCString(bam_rec.seq));
-      bool strand = !hasFlagRC(bam_rec);
+      //bool strand = !hasFlagRC(bam_rec);
       // build a list of mapped regions
       // length>1 if have spliced mappings
       // --> length(cigarElement) > 1
@@ -194,7 +264,7 @@ bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, con
       }
       if (skip or read_len<25) continue;
       int pos_end = pos_begin + read_len;
-      position p{refID, pos_begin, pos_end, strand};
+      position p{refID, pos_begin, pos_end, UNKNOWN};
       auto it = rd_rec.find(name);
       if (it == rd_rec.end()) {
 	int count(get_count_from_fasta_header(name, cnt_sep));
