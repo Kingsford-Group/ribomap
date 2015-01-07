@@ -223,6 +223,17 @@ bool expressed_read_codon_ranges_from_bam(fp_list_t& fp_codon_list, const char *
   return false;
 }
 
+bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, int offset, const string& cnt_sep)
+{
+  cout<<"getting alignment records..."<<endl;
+  rd_rec_map_t rd_rec;
+  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep);
+  cout<<"total number of reads: "<<rd_rec.size()<<endl;
+  cout<<"getting read type and p-sites...\n";
+  assign_P_site(rd_rec, tinfo, fp_rec_out, offset);
+  return false;
+}
+
 bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, const char* offset_fn, const string& cnt_sep)
 {
   cout<<"getting readlen mapping to P site offset..."<<endl;
@@ -233,17 +244,6 @@ bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const 
   cout<<"total number of reads: "<<rd_rec.size()<<endl;
   cout<<"getting read type and p-sites...\n";
   assign_P_site(rd_rec, tinfo, fp_rec_out, rl2p);
-  return false;
-}
-
-bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, int offset, const string& cnt_sep)
-{
-  cout<<"getting alignment records..."<<endl;
-  rd_rec_map_t rd_rec;
-  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep);
-  cout<<"total number of reads: "<<rd_rec.size()<<endl;
-  cout<<"getting read type and p-sites...\n";
-  assign_P_site(rd_rec, tinfo, fp_rec_out, offset);
   return false;
 }
 

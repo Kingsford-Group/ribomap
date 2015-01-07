@@ -44,10 +44,10 @@ void alignment_regions_to_codon_ranges(const rd_rec_map_t& fp_rec, const transcr
 read_t read_type_from_range(const position& ibp, int cds_begin, int cds_end, position& obp);
 read_t read_type_of_psite(const position& ibp, int cds_begin, int cds_end, int offset, position& obp);
 // universal offset given
-bool expressed_read_bases_from_bam(fp_list_t& fp_codon_list, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, int offset, const string& cnt_sep);
+bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, int offset, const string& cnt_sep);
 void assign_P_site(const rd_rec_map_t& fp_rec_in, const transcript_info& tinfo, fp_list_t& fp_rec_out, int offset);
 // read length to offset file given
-bool expressed_read_bases_from_bam(fp_list_t& fp_codon_list, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, const char* offset_fn, const string& cnt_sep);
+bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, const char* offset_fn, const string& cnt_sep);
 rlen2psite_t get_readlen_psite_map(const char* offset_fn);
 void assign_P_site(const rd_rec_map_t& fp_rec_in, const transcript_info& tinfo, fp_list_t& fp_rec_out, rlen2psite_t rl2p);
 #endif
