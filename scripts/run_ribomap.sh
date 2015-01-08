@@ -7,13 +7,14 @@ min_fplen=27
 max_fplen=33
 nproc=15 # threads
 nmismatch=1
-offset=12 # P-site offset
+offset=offset.txt #12 # P-site offset
 #=============================
 # pre-filled parameters
 #=============================
 # preprocess
-work_dir="$(pwd)"
-work_dir=${work_dir%/*}/
+src_dir=`dirname $0`
+work_dir=${src_dir}/../
+bin_dir=${work_dir}bin/
 fasta_dir=${work_dir}data/fasta/
 # star index
 star_idx_dir=${work_dir}StarIndex/yeast/
@@ -250,14 +251,13 @@ fi
 #=============================
 # step 5: run ribomap
 #=============================
-ribomap_out=${output_dir}/${ribo_core}.profile
+ribomap_out=${output_dir}/${ribo_core}
 options="--mrnabam ${rna_bam} --ribobam ${ribo_bam} --fasta ${transcript_fa} --sf ${sm_out} --offset ${offset} --out ${ribomap_out}"
 if [ ! -z "${cds_range}" ] && [ -f ${cds_range} ]; then
     options+=" --cds_range ${cds_range}"
 fi
-echo "all good until here"
-if [ ! -f ${ribomap_out} ]; then
+if [ ! -f ${ribomap_out}.base ]; then
     echo "running riboprof..."
     ./riboprof ${options}
-    check_file ${ribomap_out} "pipeline failed at ribosome profile generation!"
+    check_file ${ribomap_out}.base "pipeline failed at ribosome profile generation!"
 fi
