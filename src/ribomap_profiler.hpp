@@ -23,9 +23,8 @@ struct tprofile{
   // expected read count on each position 
   double tot_count;
   vector<double> count;
-  // transcript abundance from sailfish
+  // transcript abundance per base from sailfish
   double tot_abundance;
-  map<read_t, double> rdt2abd;
 };
 
 // SHOULD GET RID OF
@@ -51,20 +50,20 @@ public:
   unordered_map<rid_t, rid_t> refID2pID; //ref index from fasta --> profile index
   ribo_profile(const transcript_info& tinfo, const char* fname, const string& filetype, double abundance_cutoff = 1);
   bool assign_reads(const fp_list_t& fp_base_list, const unordered_set<int>& type);
-  bool initialize_read_count(const fp_list_t& fp_codon_list, bool normalize = true);
   vector<rid_t> get_expressed_transcript_ids() const;
   bool is_expressed(rid_t refID) const { return nonzero_abundance_vec[refID]; }
   const vector<double>& get_read_assignments(rid_t t) const { return profile[t].count;}
-  double get_prob(rid_t t, read_t type);
   double get_count(rid_t t, rid_t i) const { return profile[t].count[i]; }
   double get_tot_abundance(rid_t t) const { return profile[t].tot_abundance; }
   double get_tot_count(rid_t t) const { return profile[t].tot_count; }
   rid_t get_transcript_index(rid_t refID) const { return refID2pID.at(refID); }
   size_t len(rid_t t) const { return profile[t].count.size(); }
   size_t number_of_transcripts() const { return profile.size(); }
-  bool single_map_read_count(const fp_list_t& fp_codon_list);
+  // Need to get rid of
+  bool initialize_read_count(const fp_list_t& fp_codon_list, bool normalize = true);
   bool assign_reads();
   void update_count_profile();
+  bool single_map_read_count(const fp_list_t& fp_codon_list);
 private:
   vector<tprofile> profile;
   // bit vector: 1--transcript has non-zero abundance; 0--zero abundance
@@ -73,6 +72,7 @@ private:
   void sailfish_parser(const transcript_info& tinfo, const char* sf_fname, double abundance_cutoff);
   void cufflinks_parser(const transcript_info& tinfo, const char* cl_fname, double abundance_cutoff);
   void express_parser(const transcript_info& tinfo, const char* ep_fname, double abundance_cutoff);
+  void build_read_prob(const transcript_info& tinfo);
   void reset_read_count();
   void include_abundant_transcript(rid_t refID) { nonzero_abundance_vec.set(refID); }
   void add_read_count(rid_t t, rid_t i, double count) { profile.at(t).count.at(i) += count; }

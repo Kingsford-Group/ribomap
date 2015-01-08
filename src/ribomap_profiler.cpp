@@ -62,12 +62,13 @@ void ribo_profile::sailfish_parser(const transcript_info& tinfo, const char* sf_
       i = 0;
       if (tpm < abundance_cutoff) continue;
       rid_t rid(tinfo.get_refID(tid));
-      int plen(tinfo.cds_pep_len(rid));
-      // total number of (t,i) fragments: #transcript x plen
-      total_abundance += tpm * plen;
+      if (rid == tinfo.total_count()) continue;
+      int tlen(tinfo.tlen(rid));
+      // denominator for computing relative transcript abundance per nucleotide
+      total_abundance += tpm * tlen ;
       // initialize profile list
-      vector<double> count(plen,0);
-      profile.emplace_back(tprofile{0, count, tpm, map<read_t, double>{{UNKNOWN, tpm}, {FRAME0, tpm}}});
+      vector<double> count(tlen,0);
+      profile.emplace_back(tprofile{0, count, tpm});
       refID2pID[rid] = pid++;
       include_abundant_transcript(rid);
     }
@@ -107,10 +108,10 @@ void ribo_profile::cufflinks_parser(const transcript_info& tinfo, const char* cl
       if (fpkm < abundance_cutoff) continue;
       rid_t rid(tinfo.get_refID(tid));
       if (rid == tinfo.total_count()) continue;
-      int plen(tinfo.cds_pep_len(rid));
+      int tlen(tinfo.tlen(rid));
       total_abundance += fpkm;
       // initialize profile list
-      vector<double> count(plen,0);
+      vector<double> count(tlen,0);
       profile.emplace_back(tprofile{0, count, fpkm});
       refID2pID[rid] = pid++;
       include_abundant_transcript(rid);
@@ -151,10 +152,10 @@ void ribo_profile::express_parser(const transcript_info& tinfo, const char* ep_f
       if (fpkm < abundance_cutoff) continue;
       rid_t rid(tinfo.get_refID(tid));
       if (rid == tinfo.total_count()) continue;
-      int plen(tinfo.cds_pep_len(rid));
+      int tlen(tinfo.tlen(rid));
       total_abundance += fpkm;
       // initialize profile list
-      vector<double> count(plen,0);
+      vector<double> count(tlen,0);
       profile.emplace_back(tprofile{0, count, fpkm});
       refID2pID[rid] = pid++;
       include_abundant_transcript(rid);
@@ -183,14 +184,16 @@ bool ribo_profile::assign_reads(const fp_list_t& fp_base_list, const unordered_s
 	loci.emplace_back(loc);
     } // for r.al_loci
     // round 2: get transcript abundance
-    vector<double> prob(loci.size(), 0);
-    double tot_prob(0);
-    for (size_t i=0; i!=prob.size(); ++i) {
-      const position& loc(loci[i]);
-      rid_t refID(loc.refID);
-      rid_t t(get_transcript_index(refID));
-      prob[i] = get_prob(t, loc.type);
-      tot_prob += prob[i];
+    vector<double> prob(loci.size(), 1);
+    double tot_prob(1);
+    if (prob.size() > 1) {
+      for (size_t i=0; i!=prob.size(); ++i) {
+	const position& loc(loci[i]);
+	rid_t refID(loc.refID);
+	rid_t t(get_transcript_index(refID));
+	prob[i] = get_tot_abundance(t);
+	tot_prob += prob[i];
+      }
     }
     // round 3: asign reads to loci proportional to loci prob
     for (size_t i=0; i!=prob.size(); ++i) {
