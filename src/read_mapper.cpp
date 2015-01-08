@@ -10,11 +10,11 @@
 #include "bam_parser.hpp"
 #include "utils.hpp"
 #include "abundance_rank.hpp"
+#include "profile_writer.hpp"
 
-const int INVALID = -2;
 //------function forward declarations-------//
 void usage(ez::ezOptionParser& opt);
-bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const char* log_fname, const string& filetype, const string& offset);
+bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const string& log_prefix, const string& filetype, const string& offset);
 
 int main(int argc, const char ** argv)
 {
@@ -96,7 +96,7 @@ int main(int argc, const char ** argv)
   cout<<"getting transcript info...\n";
   transcript_info tinfo(transcript_fa.c_str(), cds_range.c_str());
   cout<<"total number of transcripts in transcriptome: "<<tinfo.total_count()<<endl;
-  readmapper_pipeline(tinfo, mRNA_bam.c_str(), ribo_bam.c_str(), ifname.c_str(), ofname.c_str(), filetype, offset);
+  readmapper_pipeline(tinfo, mRNA_bam.c_str(), ribo_bam.c_str(), ifname.c_str(), ofname, filetype, offset);
   return 0;
 }
 
@@ -107,7 +107,7 @@ void usage(ez::ezOptionParser& opt)
   std::cout << usage;
 }
 
-bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const char* log_fname, const string& filetype, const string& offset)
+bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const string& log_prefix, const string& filetype, const string& offset)
 {
   cout<<"assigning ribo-seq reads..."<<endl;
   cout<<"constructing profile class..."<<endl;
@@ -115,9 +115,8 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
   cout<<"number of transcripts in profile class: "<<rprofile.number_of_transcripts()<<endl;
   cout<<"loading reads from bam..."<<endl;
   fp_list_t fp_rec;
-  int psite_offset(INVALID);
   try {
-    psite_offset = stoi(offset);
+    int psite_offset = stoi(offset);
     expressed_read_bases_from_bam(fp_rec, ribo_bam, tinfo, rprofile, psite_offset, "-");
   }
   catch (const std::invalid_argument& ia) {
@@ -138,39 +137,8 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
   cout<<"rank transcripts..."<<endl;
   abundance_rank rank(rprofile, tinfo);
   rank.get_rank(100);
-  string fn(log_fname);
-  size_t i(fn.find_last_of("."));
-  string fn_core(fn.substr(0,i));
-  rank.write_diff_list(fn_core, 10);
-
+  rank.write_diff_list(log_prefix, 10);
   cout<<"write profile results..."<<endl;
-  vector<rid_t> refID_vec(rprofile.get_expressed_transcript_ids());
-  ofstream logfile(log_fname);
-  // logfile.setf(ios::scientific);
-  // logfile.precision(3);
-  for (size_t t=0; t!=rprofile.number_of_transcripts(); ++t) {
-    vector<double> rp=rprofile.get_read_assignments(t);
-    vector<double> mp=mprofile.get_read_assignments(t);
-    // bias correction by normalizing ribo profile with mRNA profile
-    vector<double> np(rp);
-    for (size_t i=0; i!= np.size(); ++i) {
-      if ( mp[i] != 0 ) 
-	np[i] /= mp[i];
-      else
-	np[i] = 0;
-    }
-    // ribosome loads: sum of ribosome profile
-    double rabd = rprofile.get_tot_count(t);
-    double tabd = rprofile.get_tot_abundance(t) * rprofile.len(t);
-    logfile<<"refID: "<<refID_vec[t]<<endl;
-    logfile<<"tid: "<<tinfo.get_tid(refID_vec[t])<<endl;
-    logfile<<"rabd: "<<rabd<<endl;
-    logfile<<"tabd: "<<tabd<<endl;
-    logfile<<"te: "<<rabd/tabd<<endl;
-    logfile<<"ribo profile: "<<rp<<endl;
-    logfile<<"normalized ribo profile: "<<np<<endl;
-    logfile<<"mRNA profile: "<<mp<<endl;
-  }
-  logfile.close();
+  generate_profile_report(log_prefix, rprofile, mprofile, tinfo);
   return false;
 }
