@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <numeric>
+#include <string>
 
 #include "ezOptionParser.hpp"
 #include "reference_info_builder.hpp"
@@ -10,9 +11,10 @@
 #include "utils.hpp"
 #include "abundance_rank.hpp"
 
+const int INVALID = -2;
 //------function forward declarations-------//
 void usage(ez::ezOptionParser& opt);
-bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const char* log_fname, const string& filetype, int offset);
+bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const char* log_fname, const string& filetype, const string& offset);
 
 int main(int argc, const char ** argv)
 {
@@ -61,7 +63,7 @@ int main(int argc, const char ** argv)
     return 1;
   }
 
-  string mRNA_bam, ribo_bam, transcript_fa, cds_range(""), ifname, ofname, filetype;
+  string mRNA_bam, ribo_bam, transcript_fa, cds_range(""), ifname, ofname, filetype, offset;
   opt.get("-m")->getString(mRNA_bam);
   opt.get("-r")->getString(ribo_bam);
   opt.get("-f")->getString(transcript_fa);
@@ -89,8 +91,7 @@ int main(int argc, const char ** argv)
   }
 
   opt.get("-o")->getString(ofname);
-  int offset;
-  opt.get("-p")->getInt(offset);
+  opt.get("-p")->getString(offset);
 
   cout<<"getting transcript info...\n";
   transcript_info tinfo(transcript_fa.c_str(), cds_range.c_str());
@@ -106,31 +107,34 @@ void usage(ez::ezOptionParser& opt)
   std::cout << usage;
 }
 
-
-ribo_profile assign_reads(const transcript_info& tinfo, const char* bam_fname, const char* ifname, const string& filetype, int offset)
+bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const char* log_fname, const string& filetype, const string& offset)
 {
-  cout<<"constructing profile class...\n";
-  ribo_profile profiler(tinfo, ifname, filetype, 0.01);
-  cout<<"number of transcripts in profile class: "<<profiler.number_of_transcripts()<<endl;
-  //reads
-  cout<<"getting read info...\n";
-  fp_list_t fp_codon_list;
-  expressed_read_codon_ranges_from_bam(fp_codon_list, bam_fname, tinfo, profiler, offset, "-");
-  cout<<"initializing read counts..."<<endl;
-  profiler.initialize_read_count(fp_codon_list, false);
+  cout<<"assigning ribo-seq reads..."<<endl;
+  cout<<"constructing profile class..."<<endl;
+  ribo_profile rprofile(tinfo, ifname, filetype, 0.01);
+  cout<<"number of transcripts in profile class: "<<rprofile.number_of_transcripts()<<endl;
+  cout<<"loading reads from bam..."<<endl;
+  fp_list_t fp_rec;
+  int psite_offset(INVALID);
+  try {
+    psite_offset = stoi(offset);
+    expressed_read_bases_from_bam(fp_rec, ribo_bam, tinfo, rprofile, psite_offset, "-");
+  }
+  catch (const std::invalid_argument& ia) {
+    expressed_read_bases_from_bam(fp_rec, ribo_bam, tinfo, rprofile, offset.c_str(), "-");
+  }
+  cout<<"assigning reads to frame0 loci..."<<endl;
+  rprofile.assign_reads(fp_rec, unordered_set<int>{FRAME0});
+  cout<<"assigning reads to non-frame0 loci..."<<endl;
+  rprofile.assign_reads(fp_rec, unordered_set<int>{UTR5, FRAME1, FRAME2, UTR3});
+  cout<<"assigning RNA-seq reads..."<<endl;
+  ribo_profile mprofile(tinfo, ifname, filetype, 0.01);
+  cout<<"number of transcripts in profile class: "<<mprofile.number_of_transcripts()<<endl;
+  cout<<"loading reads from bam..."<<endl;
+  fp_rec.clear();
+  expressed_read_bases_from_bam(fp_rec, mRNA_bam, tinfo, mprofile, -1, "-");
   cout<<"assigning reads..."<<endl;
-  profiler.assign_reads();
-  cout<<"update count profile..."<<endl;
-  profiler.update_count_profile();
-  return profiler;
-}
-
-bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const char* log_fname, const string& filetype, int offset)
-{
-  //profile
-  ribo_profile mprofile = assign_reads(tinfo, mRNA_bam, ifname, filetype, offset);
-  ribo_profile rprofile = assign_reads(tinfo, ribo_bam, ifname, filetype, offset);
-
+  mprofile.assign_reads(fp_rec,unordered_set<int>{UTR5, FRAME0, FRAME1, FRAME2, UTR3});
   cout<<"rank transcripts..."<<endl;
   abundance_rank rank(rprofile, tinfo);
   rank.get_rank(100);
@@ -156,8 +160,8 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
 	np[i] = 0;
     }
     // ribosome loads: sum of ribosome profile
-    double rabd = accumulate(rp.begin(), rp.end(), double(0));
-    double tabd = rprofile.get_tot_abundance(t);
+    double rabd = rprofile.get_tot_count(t);
+    double tabd = rprofile.get_tot_abundance(t) * rprofile.len(t);
     logfile<<"refID: "<<refID_vec[t]<<endl;
     logfile<<"tid: "<<tinfo.get_tid(refID_vec[t])<<endl;
     logfile<<"rabd: "<<rabd<<endl;
