@@ -4,25 +4,22 @@ Ribomap is a package that generates isoform-level ribosome profiles from ribosom
 
 Prerequisites for Ribomap
 ------
-* [__Sailfish__ (v0.6.3)](http://www.cs.cmu.edu/~ckingsf/software/sailfish/index.html) for transcript abundance estimation
-* [__Bowtie__ (v1.1.0)](http://bowtie-bio.sourceforge.net/index.shtml) for read mapping
+* [__Sailfish (latest improved version: Salmon)__ (v0.2.3)](https://github.com/kingsfordgroup/sailfish/releases/tag/v0.2.3) for transcript abundance estimation
+* [__STAR__ (v2.4.0h)](https://github.com/alexdobin/STAR/releases/tag/STAR_2.4.0h1) for read mapping
 
 Compile from Source code
 ------
 ### Prerequisites
 * [boost](http://www.boost.org/)
-* [cereal (v1.0.0)](http://uscilab.github.io/cereal/)
 * [seqan (v1.4.1)](http://www.seqan.de/)
 
 ### Compile
 a c++ compiler that support c++11 features (for instance g++ >= 4.7) is required.
 
     cd src
-    make all INC="-I/opt/local/include"
+    make riboprof INC="-I/opt/local/include"
 
-This will generate two executables: 
-* `merge_fq_to_fa`: preprocess the ribosome profiling reads
-* `ribomap`: assign ribosome profiling reads to transcript locations
+This will generate a c++ executable `riboprof` that assign ribosome profiling reads to transcript locations
 
 Please add the path for the prerequistite headers with flag `INC="-I<path/to/include/>"`
 
@@ -31,75 +28,115 @@ Run Ribomap
 #### Run Ribomap with automatic transcript abundance estimation
 `run_ribomap.sh` is a pipeline that takes in the riboseq data and the RNA-seq data and automatically estimates the transcript abundance, then assigns riboseq reads to transcript locations based on the estimated transcript abundance. 
 
-Under the `src` directory, run:
+Under the `scripts` directory, run:
 
       ./run_ribomap.sh [options]
 The list of options are as follows:
-* __--rnaseq__ Input RNA-seq read fastq file for transcript abundance estimation
-* __--riboseq__	     Input ribosome profiling (riboseq) read fastq file
-* __--ref_fa__ Input trascriptome reference fasta file
-* __--gtf__ Input transcriptome	  annotation gtf file
-* __--rrna_fa__	(default ribomap/data/rrna_human.fasta) Input ribosome RNA sequence fasta file (human ribosome RNA sequences are included in directory `data`)
-* __--seedlen__ (default 25) Seed length to trim down the riboseq reads
-* __--offset__ (default 15) Offset location in a read that the ribosome P-site maps to
+* __--rnaseq_fq__ (required) Input RNA-seq read fastq.gz file for transcript abundance estimation
+* __--riboseq_fq__ (required) Input ribosome profiling (riboseq) read fastq.gz file
+* __--transcript_fa__ (required) Input trascriptome reference fasta file
+* __--contaminant_fa__ Input contaminant sequence fasta file (human ribosome RNA sequences are included in directory `data`)
+* __--cds_range__ A text file that includes the coding sequence (CDS) range for all transcripts (see description below). If such an option is not provided, the transcript fasta file is assume to only include the CDS regions
+* __--work_dir__ (default the parent directory of `scripts`) The working directory where all intermediate and final results will write to
+* __adapter__ (default `CTGTAGGCACCATCAAT`) The linker sequence attached to the 5' end of the ribo-seq reads
+* __min_fplen__ (default 27) Minimun read length to keep for downstream analysis
+* __max_fplen__ (default 33) Maximum riboseq read length to keep for downstream analysis
 * __--nproc__ (default 15) Number of threads can be used by ribomap
-
+* __--offset__ (default 12) Offset location in a read that the ribosome P-site maps to, or a text file name that defines the P-site offset based on read length (see description below)
+* __--fasta_dir__ (default `$work_dir/data/fasta/`) Directory to store the preproceccsed fastq file
+* __--star_idx_dir__ (default `$work_dir/StarIndex/`) Directory to store Star index
+* __alignment_dir__ (default  `$work_dir/alignment/`) Directory to store alignment results output by STAR
+* __sailfish_dir__ (default `$work_dir/sm_quant/`) Directory to store sailfish result
+* __output_dir__ (default `$work_dir/outputs/`) Directory to store ribomap's outputs
 One example of using the shell script:
 
-    ./run_ribomap.sh  \
-    --rnaseq ../data/GSM546921_filtered_sequence.fq \
-    --riboseq ../data/GSM546920_filtered_sequence.fq
+    ./run_ribomap.sh \
+    --rnaseq_fq rnaseq.fq.gz \
+    --riboseq_fq riboseq.fq.gz \
+    --contaminant_fa contaminant.fa \
+    --transcript_fa transcript.fa \
+    --cds_range cds_range.txt
 
 Please connect the parameter flags and the parameters with a white space.
 
+* __CDS range file__ A plain text file that includes the CDS regions of transcriptome. Each line in the file should be in the following format:
+
+       `transcript_id start stop`
+
+`transcript_id` should be consistent with the transcript ID in the fasta file, `start` is the start base of the coding region in the transcript fasta file (zero-based), and `stop` is one base pass the stop position of the coding sequence. 
+
+* __offset file__ A plain text file that describes the read length and the P site offset for that read length. Each line in the file should be in the following format:
+
+  	   `read_length P-site_offset`
+
+Only a proper range of read length should be included, reads with a length not specified in this file will be discarded for downstream analysis.
+
 #### Run Ribomap by providing the transcript abundance estimation file
-Ribomap supports transcript abundance estimation files from [*Sailfish*](http://www.cs.cmu.edu/~ckingsf/software/sailfish/), [*Cufflinks*](http://cufflinks.cbcb.umd.edu/index.html) and [*eXpress*](http://bio.math.berkeley.edu/eXpress/overview.html). Mapping the ribosome footprint can be performed providing any of the three transcript abundance esitmation files listed above.
+Ribomap supports transcript abundance estimation files from [*Sailfish*](http://www.cs.cmu.edu/~ckingsf/software/sailfish/index.html), [*Cufflinks*](http://cufflinks.cbcb.umd.edu/index.html) and [*eXpress*](http://bio.math.berkeley.edu/eXpress/overview.html). Mapping the ribosome footprint can be performed providing any of the three transcript abundance esitmation files listed above.
 
-Under the `src` directory, run:
+Under the `bin` directory, run:
 
-      ./ribomap [options]
+      ./riboprof [options]
 
 The list of options are as follows:
 
-* __-b | --bam__ Bam file of ribosome footprint read mapping to the transcriptome
+* __-r | --ribobam__ Bam file of ribo-seq read mappings to the transcriptome
+* __-m | --mrnabam__ Bam file of RNA-seq read mappings to the transcriptome
 * __-f | --fasta__ Transcriptome reference fasta file
-* __-g | --gtf__ Transcriptome annotation gtf file
+* __-cds | --cds_range__ CDS range file
 * __-s | --sf__ Transcript abundance estimation produced by Sailfish
 * __-c | --cl__ Transcript abundance estimation produced by Cufflinks
 * __-e | --ep__ Transcript abundance estimation produced by eXpress
-* __-o | --out__ Output file name of the estimated ribosome profile
-* __-p | --offset__ Offset location in a read that the ribosome P-site maps to
+* __-o | --out__ Output file prefix of Ribomap's result
+* __-p | --offset__ Offset location in a read that the ribosome P-site maps to, or the name of a offset file that specifies P-site offset for different read length
 
 One example of using the executable:
 
-    ./ribomap --bam ../tmp/GSM546920_filtered_sequence_nodup.bam \
-    --fasta ../data/gencode.v18.pc_transcripts_filter.fa \
-    --gtf ../data/gencode.v18.annotation.gtf \
-    --sf ../sf_quant/quant_bias_corrected.sf \
-    --out ../outputs/GSM546920_filtered_sequence.profile \
-    --offset 15
+    ./riboprof  \
+    --mrnabam mRNA.bam --ribobam ribo.bam \
+    --fasta transcript.fa --cds_range cds_range.txt \
+    --sf quant.sf \
+    --offset 12 \
+    --out ../outputs/ribomap\n
 
 Please connect the parameter flags and the parameters with a space.
 
 Ribomap output files
 ------
-Ribomap produces three output files:
-#### _XXX.profile_
-The ribosome profiles for the expressed transcripts with other analysis statistics. Each entry of a specific transcript looks like this:
+Ribomap produces five output files:
+#### _XXX.codon_
+The ribosome profiles within the CDS of reach transcript. Each entry of a specific transcript looks like this:
 ~~~~~~
-  refID: 425
-  tid: ENST00000234875.4
-  rabd:  1358.65
-  tabd:  3.88878e-07
-  te: 3.49377e+09
-  rprofile: 7 0 0 0 54 0 0 0 1 4 ...
+	refID: 0
+	tid: YAL001C
+	ribo profile: 0 0 0 74 68 ...
+	mRNA profile: 31 35 50 73 87 96 104 ...
+	normalized ribo profile: 0 0 0 1.0137 0.781609 0.0208333 0.125 ...
 ~~~~~~  
 * __refID__ The transcript fai index in the transcriptome fasta file.
 * __tid__ Transcript ensemble ID.
-* __rabd__ Total ribosome loads, which is the sum of the __rprofile__ vector.
-* __tabd__ Relative transcript abundance per codon (alpha_m) derived from Sailfish’s result.
-* __te__ Relative translational efficiency, which is the ratio between __rabd__ and __tabd__.	
-* __rprofile__ Ribosome profile vector of the CDS regions of the transcript. Each number in the vector is the number of ribosome footprints that are estimated to be from the corresponding codon location.
+* __ribo profile__ Ribosome profile vector of the CDS regions of the transcript. Each number in the vector is the number of ribosome footprints that are estimated to be from the corresponding codon location.
+* __mRNA profile__ RNA-seq profile vector of the CDS regions of the transcript. Each number in the vector is the read coverage count that are esimated on the corresponding codon location.
+* __normalized ribo profile__ Ribosome profile vector of the CDS regions of the transcript after bias correction. Each number in the vetor is the ratio between the ribo profile count and the mRNA profile count
+
+#### _XXX.base_
+The nucleotide-level ribosome profiles including the UTR regions. The file format is exactly the same as the the _XXX.codon_ file.
+
+#### _XXX.stats_
+The summarized statistics for each transcripts. Each entro of a specific transcript looks like this: 
+~~~~~
+	refID: 0
+	tid: YAL001C
+	rabd: 3959
+	tabd: 0.000209384
+	te: 1.89078e+07
+~~~~~~
+* __refID__ The transcript fai index in the transcriptome fasta file.
+* __tid__ Transcript ensemble ID.
+* __rabd__ Ribosome loads, which is the total number of ribosome reads that are esimated from this trascript.
+* __tabd__ Relative transcript abundance from Sailfish’s result.
+* __te__ Relative translational efficiency, which is the ratio between __rabd__ and __tabd__.
+
 
 #### _XXX_abundant.list_ 
 A list of transcripts whose total ribosome abundance is more than expected given the transcript abundance. 
@@ -120,8 +157,8 @@ The file format is the same as _XXX_abundant.list_.
 
 Test case
 ------
-### Run test case
-under the `src` directory, run:
+### Run test case (TODO)
+under the `script` directory, run:
 
       ./get_data.sh
       ./run_ribomap.sh
