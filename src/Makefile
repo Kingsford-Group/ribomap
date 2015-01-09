@@ -8,6 +8,9 @@ LDFLAGS = -lz -lbz2
 OUTPUT_OPTION = -o $@
 
 all: riboprof
+install:
+	mkdir -p ../bin/
+	cp riboprof ../bin/
 clean:
 	rm -f *.o riboprof ref_checker
 
