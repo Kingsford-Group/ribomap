@@ -14,6 +14,10 @@ offset=12 # P-site offset
 # preprocess
 src_dir=`dirname $0`
 bin_dir=${src_dir}/../bin/
+lib_dir=${src_dir/../lib/
+export PATH=${bin_dir}:$PATH
+export LD_LIBRARY_PATH=${lib_dir}:$LD_LIBRARY_PATH
+export DYLD_LIBRARY_PATH=${lib_dir}:$DYLD_LIBRARY_PATH
 work_dir=${src_dir}/../
 fasta_dir=${work_dir}data/fasta/
 # star index
@@ -258,6 +262,6 @@ if [ ! -z "${cds_range}" ] && [ -f ${cds_range} ]; then
 fi
 if [ ! -f ${ribomap_out}.base ]; then
     echo "running riboprof..."
-    ${bin_dir}riboprof ${options}
+    riboprof ${options}
     check_file ${ribomap_out}.base "pipeline failed at ribosome profile generation!"
 fi
