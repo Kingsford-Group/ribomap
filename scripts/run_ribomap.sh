@@ -11,7 +11,6 @@ offset=12 # P-site offset
 #=============================
 # pre-filled parameters
 #=============================
-# preprocess
 src_dir=`dirname $0`
 bin_dir=${src_dir}/../bin/
 lib_dir=${src_dir/../lib/
@@ -19,20 +18,13 @@ export PATH=${bin_dir}:$PATH
 export LD_LIBRARY_PATH=${lib_dir}:$LD_LIBRARY_PATH
 export DYLD_LIBRARY_PATH=${lib_dir}:$DYLD_LIBRARY_PATH
 work_dir=${src_dir}/../
-fasta_dir=${work_dir}data/fasta/
-# star index
 star_idx_dir=${work_dir}StarIndex/
+# star index
 rrna_idx=${star_idx_dir}contaminant/
 transcript_idx=${star_idx_dir}transcript/
-# star outputs
-tmp_dir=${work_dir}alignment/
 # star params
 align_params="--seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
 SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS --outSAMprimaryFlag AllBestScore"
-# salmon
-sm_odir=${work_dir}sm_quant
-# ribomap
-output_dir=${work_dir}outputs
 #=============================
 # functions
 #=============================
@@ -165,6 +157,14 @@ fi
 #=============================
 # make directories
 #=============================
+# preprocess
+fasta_dir=${work_dir}data/fasta/
+# star outputs
+tmp_dir=${work_dir}alignment/
+# salmon
+sm_odir=${work_dir}sm_quant
+# ribomap
+output_dir=${work_dir}outputs
 mkdir -p ${fasta_dir}
 mkdir -p ${tmp_dir}
 mkdir -p ${output_dir}
