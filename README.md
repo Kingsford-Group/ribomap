@@ -4,7 +4,8 @@ Ribomap is a package that generates isoform-level ribosome profiles from ribosom
 
 Prerequisites for Ribomap
 ------
-* [__Sailfish (latest improved version: Salmon)__ (v0.2.3)](https://github.com/kingsfordgroup/sailfish/releases/tag/v0.2.3) for transcript abundance estimation
+* [__FASTX-Toolkit__] (http://hannonlab.cshl.edu/fastx_toolkit/index.html) for preprocessing reads
+* [__Sailfish__ (latest improved version: Salmon v0.2.3)](https://github.com/kingsfordgroup/sailfish/releases/tag/v0.2.3) for transcript abundance estimation
 * [__STAR__ (v2.4.0h)](https://github.com/alexdobin/STAR/releases/tag/STAR_2.4.0h1) for read mapping
 
 Compile from Source code
