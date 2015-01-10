@@ -1,5 +1,4 @@
 #include <iostream>
-#include <sstream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -95,9 +94,7 @@ bool transcript_info::get_info_from_fasta(const char* tfname)
       std::cerr<<"ERROR reading FASTA "<<tfname<<std::endl;
       return 1;
     }
-    stringstream header(string(toCString(theader)));
-    string tid;
-    header>>tid;
+    string tid(toCstring(theader));
     int tlen = length(tseq);
     int start(0), end(tlen); // end position have to pass over the last position
     end -= (end-start)%3; 
