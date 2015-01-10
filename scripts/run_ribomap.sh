@@ -189,7 +189,7 @@ if [ ! -f ${ribo_fa} ]; then
     check_file ${ribo_fa} "pipeline failed at preprocessing riboseq_fq: ${riboseq_fq}!"
 fi
 if [ ! -f ${ribo_size_fa} ]; then
-    python ${src_dir}filter_reads_by_size.py ${ribo_fa} ${ribo_size_fa} ${min_fplen} ${max_fplen}
+    python ${src_dir}/filter_reads_by_size.py ${ribo_fa} ${ribo_size_fa} ${min_fplen} ${max_fplen}
     check_file ${ribo_size_fa} "pipeline failed at filtering riboseq with the wrong size!"
 fi
 #=============================
