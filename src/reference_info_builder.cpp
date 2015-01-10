@@ -94,7 +94,7 @@ bool transcript_info::get_info_from_fasta(const char* tfname)
       std::cerr<<"ERROR reading FASTA "<<tfname<<std::endl;
       return 1;
     }
-    string tid(toCstring(theader));
+    string tid(toCString(theader));
     int tlen = length(tseq);
     int start(0), end(tlen); // end position have to pass over the last position
     end -= (end-start)%3; 
