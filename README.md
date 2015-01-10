@@ -39,16 +39,17 @@ The list of options are as follows:
 * __--contaminant_fa__ Input contaminant sequence fasta file (human ribosome RNA sequences are included in directory `data`)
 * __--cds_range__ A text file that includes the coding sequence (CDS) range for all transcripts (see description below). If such an option is not provided, the transcript fasta file is assume to only include the CDS regions
 * __--work_dir__ (default the parent directory of `scripts`) The working directory where all intermediate and final results will write to
-* __adapter__ (default `CTGTAGGCACCATCAAT`) The linker sequence attached to the 5' end of the ribo-seq reads
-* __min_fplen__ (default 27) Minimun read length to keep for downstream analysis
-* __max_fplen__ (default 33) Maximum riboseq read length to keep for downstream analysis
+* __--adapter__ (default `CTGTAGGCACCATCAAT`) The linker sequence attached to the 5' end of the ribo-seq reads
+* __--min_fplen__ (default 27) Minimun read length to keep for downstream analysis
+* __--max_fplen__ (default 33) Maximum riboseq read length to keep for downstream analysis
 * __--nproc__ (default 15) Number of threads can be used by ribomap
 * __--offset__ (default 12) Offset location in a read that the ribosome P-site maps to, or a text file name that defines the P-site offset based on read length (see description below)
 * __--fasta_dir__ (default `$work_dir/data/fasta/`) Directory to store the preproceccsed fastq file
 * __--star_idx_dir__ (default `$work_dir/StarIndex/`) Directory to store Star index
-* __alignment_dir__ (default  `$work_dir/alignment/`) Directory to store alignment results output by STAR
-* __sailfish_dir__ (default `$work_dir/sm_quant/`) Directory to store sailfish result
-* __output_dir__ (default `$work_dir/outputs/`) Directory to store ribomap's outputs
+* __--alignment_dir__ (default  `$work_dir/alignment/`) Directory to store alignment results output by STAR
+* __--sailfish_dir__ (default `$work_dir/sm_quant/`) Directory to store sailfish result
+* __--output_dir__ (default `$work_dir/outputs/`) Directory to store ribomap's outputs
+* __--force__ Force ribomap to regenerate all intermediate steps
 One example of using the shell script:
 ~~~~~~
     ./run_ribomap.sh \
