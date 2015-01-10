@@ -24,7 +24,7 @@ rrna_idx=${star_idx_dir}contaminant/
 transcript_idx=${star_idx_dir}transcript/
 # star params
 align_params="--seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
-SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS --outSAMprimaryFlag AllBestScore"
+SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS" # --outSAMprimaryFlag AllBestScore"
 #=============================
 # functions
 #=============================
