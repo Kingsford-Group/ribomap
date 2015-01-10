@@ -24,7 +24,7 @@ rrna_idx=${star_idx_dir}contaminant/
 transcript_idx=${star_idx_dir}transcript/
 # star params
 align_params="--seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
-SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS --outSAMprimaryFlag AllBestScore"
+SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS" # --outSAMprimaryFlag AllBestScore"
 #=============================
 # functions
 #=============================
@@ -176,7 +176,7 @@ ribo_core=${ribo_core%%.*}
 # step 1: preprocess reads
 #=============================
 echo "preprocessing reads (quality control + trim adapter + trim first base + collapse duplicate reads + fastq to fasta"
-fastx_pipe="fastx_clipper -Q33 -a ${adapter} -l ${min_fplen} -n -v | fastq_to_fasta -v"
+fastx_pipe="fastx_clipper -Q33 -a ${adapter} -l ${min_fplen} -c -n -v | fastq_to_fasta -v"
 rna_fa=${fasta_dir}${rna_core}.fa
 ribo_fa=${fasta_dir}${ribo_core}.fa
 ribo_size_fa=${fasta_dir}${ribo_core}-size.fa
