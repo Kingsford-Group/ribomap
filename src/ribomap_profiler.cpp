@@ -47,12 +47,13 @@ void ribo_profile::sailfish_parser(const transcript_info& tinfo, const char* sf_
     ++i;
     // 1st column: transcript ID
     if (i==1) {
-      // parse Gencode transcript ID to get the actural ID
-      size_t id(word.find('|'));
-      if (id!= word.npos)
-	tid = word.substr(0,id);
-      else
-	tid = word;
+      tid = word;
+      // // parse Gencode transcript ID to get the actural ID
+      // size_t id(word.find('|'));
+      // if (id!= word.npos)
+      // 	tid = word.substr(0,id);
+      // else
+      // 	tid = word;
     }
     // 3rd column: transcript abundance (tpm: transcript per million)
     else if (i==3) {
@@ -92,12 +93,13 @@ void ribo_profile::cufflinks_parser(const transcript_info& tinfo, const char* cl
     ++i;
     // 1st column: transcript ID
     if (i==1) {
-      // parse Gencode transcript ID to get the actural ID
-      size_t id(word.find('|'));
-      if (id!= word.npos)
-	tid = word.substr(0,id);
-      else
-	tid = word;
+      tid = word;
+      // // parse Gencode transcript ID to get the actural ID
+      // size_t id(word.find('|'));
+      // if (id!= word.npos)
+      // 	tid = word.substr(0,id);
+      // else
+      // 	tid = word;
     }
     // 10th column: transcript abundance (fpkm)
     else if (i==10) {
@@ -134,14 +136,15 @@ void ribo_profile::express_parser(const transcript_info& tinfo, const char* ep_f
   double fpkm(0), total_abundance(0);
   while (ifile >> word) {
     ++i;
-    // 1st column: transcript ID
+    // 2nd column: transcript ID
     if (i==2) {
-      // parse Gencode transcript ID to get the actural ID
-      size_t id(word.find('|'));
-      if (id!= word.npos)
-	tid = word.substr(0,id);
-      else
-	tid = word;
+      tid = word;
+      // // parse Gencode transcript ID to get the actural ID
+      // size_t id(word.find('|'));
+      // if (id!= word.npos)
+      // 	tid = word.substr(0,id);
+      // else
+      // 	tid = word;
     }
     // 11th column: transcript abundance
     else if (i==11) {
