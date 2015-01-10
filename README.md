@@ -50,14 +50,14 @@ The list of options are as follows:
 * __sailfish_dir__ (default `$work_dir/sm_quant/`) Directory to store sailfish result
 * __output_dir__ (default `$work_dir/outputs/`) Directory to store ribomap's outputs
 One example of using the shell script:
-
+~~~~~~
     ./run_ribomap.sh \
     --rnaseq_fq rnaseq.fq.gz \
     --riboseq_fq riboseq.fq.gz \
     --contaminant_fa contaminant.fa \
     --transcript_fa transcript.fa \
     --cds_range cds_range.txt
-
+~~~~~~
 Please connect the parameter flags and the parameters with a white space.
 
 * __CDS range file__ A plain text file that includes the CDS regions of transcriptome. Each line in the file should be in the following format:
@@ -92,14 +92,14 @@ The list of options are as follows:
 * __-p | --offset__ Offset location in a read that the ribosome P-site maps to, or the name of a offset file that specifies P-site offset for different read length
 
 One example of using the executable:
-
+~~~~~~
     ./riboprof  \
     --mrnabam mRNA.bam --ribobam ribo.bam \
     --fasta transcript.fa --cds_range cds_range.txt \
     --sf quant.sf \
     --offset 12 \
     --out ../outputs/ribomap\n
-
+~~~~~~
 Please connect the parameter flags and the parameters with a space.
 
 Ribomap output files
