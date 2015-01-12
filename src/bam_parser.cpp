@@ -261,9 +261,16 @@ rlen2psite_t get_readlen_psite_map(const char* offset_fn)
 int get_count_from_fasta_header(const string header, const string& sep="_")
 {
   vector<string> words;
+  int count(1);
   string_split(header, sep, words);
   if (words.size()==1) return 1;
-  else return atoi(words.back().c_str());
+  else {
+    try { count = std::stoi(words.back().c_str()); }
+    catch (const std::invalid_argument& ia) {
+      return 1;
+    }
+  }
+  return count;
 }
 
 bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, const ribo_profile& profiler, const string& cnt_sep)
