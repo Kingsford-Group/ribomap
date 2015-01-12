@@ -129,7 +129,7 @@ do
 	    shift
 	    ;;
 	--force)
-	    force=true
+	    force="$1"
 	    shift
 	    ;;
 	*)
