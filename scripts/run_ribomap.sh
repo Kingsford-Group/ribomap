@@ -182,7 +182,7 @@ ribo_core=${ribo_core%%.*}
 #=============================
 echo "preprocessing reads (quality control + trim adapter + trim first base + collapse duplicate reads + fastq to fasta"
 #fastx_pipe="fastx_clipper -Q33 -a ${adapter} -l ${min_fplen} -c -n -v | fastq_to_fasta -v"
-fastx_pipe="fastq_to_fasta -v"
+fastx_pipe="fastq_to_fasta -Q33 -v"
 rna_fa=${fasta_dir}${rna_core}.fa
 ribo_fa=${fasta_dir}${ribo_core}.fa
 if  [ "${force}" = true ] || [ ! -f ${rna_fa} ]; then
