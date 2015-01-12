@@ -168,7 +168,7 @@ sm_odir=${work_dir}sm_quant
 # ribomap
 output_dir=${work_dir}outputs
 # star params
-align_params="--seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
+align_params="--clip3pAdapterSeq ${adapter} --seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
 SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS" # --outSAMprimaryFlag AllBestScore"
 mkdir -p ${fasta_dir}
 mkdir -p ${tmp_dir}
@@ -216,12 +216,12 @@ if [ ! -z "${contaminant_fa}" ] && [ -f ${contaminant_fa} ]; then
     fi
     if [ "${force}" = true ] || [ ! -f ${rna_nrrna_fa} ];  then
 	echo "filtering contaminants in RNA_seq..."
-	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${rna_fa} --outFileNamePrefix ${ornaprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS--clip3pAdapterSeq ${adapter} ${align_params} > /dev/null
+	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${rna_fa} --outFileNamePrefix ${ornaprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS${align_params} > /dev/null
 	check_file ${rna_nrrna_fa} "pipeline failed at filtering rrna in RNA_seq!"
     fi
     if [ "${force}" = true ] || [ ! -f ${ribo_nrrna_fa} ];  then
 	echo "filtering contaminants in ribo_seq..."
-	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${ribo_fa} --outFileNamePrefix ${oriboprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS --clip3pAdapterSeq ${adapter} ${align_params} > /dev/null
+	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${ribo_fa} --outFileNamePrefix ${oriboprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${align_params} > /dev/null
 	check_file ${ribo_nrrna_fa} "pipeline failed at filtering rrna in ribo_seq!"
     fi
 else
