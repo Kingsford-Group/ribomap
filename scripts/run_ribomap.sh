@@ -169,7 +169,6 @@ sm_odir=${work_dir}sm_quant
 output_dir=${work_dir}outputs
 # star params
 align_params="--seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
-echo ${align_params}
 SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS" # --outSAMprimaryFlag AllBestScore"
 mkdir -p ${fasta_dir}
 mkdir -p ${tmp_dir}
