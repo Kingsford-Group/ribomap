@@ -19,6 +19,14 @@ export PATH=${bin_dir}:$PATH
 export LD_LIBRARY_PATH=${lib_dir}:$LD_LIBRARY_PATH
 export DYLD_LIBRARY_PATH=${lib_dir}:$DYLD_LIBRARY_PATH
 work_dir=${src_dir}/../
+# preprocess
+fasta_dir=${work_dir}data/fasta/
+# star outputs
+tmp_dir=${work_dir}alignment/
+# salmon
+sm_odir=${work_dir}sm_quant
+# ribomap
+output_dir=${work_dir}outputs
 star_idx_dir=${work_dir}StarIndex/
 # star index
 rrna_idx=${star_idx_dir}contaminant/
@@ -80,6 +88,14 @@ do
 	    ;;
 	--work_dir)
 	    work_dir="$1"
+	    # preprocess
+	    fasta_dir=${work_dir}data/fasta/
+	    # star outputs
+	    tmp_dir=${work_dir}alignment/
+	    # salmon
+	    sm_odir=${work_dir}sm_quant
+	    # ribomap
+	    output_dir=${work_dir}outputs
 	    shift
 	    ;;
 	--adapter)
@@ -159,14 +175,6 @@ fi
 #=============================
 # make directories
 #=============================
-# preprocess
-fasta_dir=${work_dir}data/fasta/
-# star outputs
-tmp_dir=${work_dir}alignment/
-# salmon
-sm_odir=${work_dir}sm_quant
-# ribomap
-output_dir=${work_dir}outputs
 # star params
 align_params="--clip3pAdapterSeq ${adapter} --seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
 SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS" # --outSAMprimaryFlag AllBestScore"
