@@ -15,6 +15,9 @@ abundance_rank::abundance_rank(const ribo_profile& rprofile, const transcript_in
   for (size_t t=0; t!=rprofile.number_of_transcripts(); ++t) {
     auto& p = rprofile.get_read_assignments(t);
     double rabd = accumulate(p.begin(), p.end(), double(0));
+    if (rabd != rprofile.get_tot_count(t)) {
+      cout<<"accumulate abundance not equal tot_count! "<<rabd<<" "<<rprofile.get_tot_count(t)<<" "<<t<<endl;
+    }
     if ((not have_spike(p)) or (not have_multiple_spikes(p))) continue;
     string tid = tinfo.get_tid(refID_vec[t]);
     double tabd = rprofile.get_tot_abundance(t);
