@@ -273,7 +273,7 @@ int get_count_from_fasta_header(const string header, const string& sep="_")
   return count;
 }
 
-bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, const ribo_profile& profiler, const string& cnt_sep)
+bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax)
 {
   // open bam file
   seqan::BamStream bamIn(fn);
@@ -306,32 +306,32 @@ bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, con
       bool skip(false);
       for (int i=0; i<length(bam_rec.cigar); ++i) {
 	switch (bam_rec.cigar[i].operation) {
-	  // add match length to read length
 	case 'M':
+	  // add match length to read length
 	  read_len += bam_rec.cigar[i].count;
 	  break;
+	case 'D':
 	  // Deletion is a gap to the read
 	  // read covered one base longer on the transcript
-	case 'D':
 	  read_len += 1;
 	  break;
+	case 'N':
 	  // skipped regions indicate novel splices
 	  // since reads are mapped to the transcriptome
 	  // skip these alignments for now
-	case 'N':
 	  skip = true;
 	  break;
+	case 'I':
 	  // Insertion is a gap to the reference
 	  // no change in read length
-	case 'I':
-	  // softclipping won't change read length
 	case 'S':
+	  // softclipping won't change read length
 	default:
 	  break;
 	}
 	if (skip) break;
       }
-      if (skip or read_len<25) continue;
+      if (skip or read_len<lmin or read_len>lmax) continue;
       int pos_end = pos_begin + read_len;
       position p{refID, pos_begin, pos_end, UNKNOWN};
       auto it = rd_rec.find(name);

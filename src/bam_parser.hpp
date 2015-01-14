@@ -34,7 +34,7 @@ using fp_list_t = vector<fp_record>;
 using rlen2psite_t = map<int, int>;
 
 // function declaration
-bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, const ribo_profile& profiler, const string& cnt_sep);
+bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax);
 // convert read range to P-site codon or codon range
 read_t base_range_to_codon_range(const position& bp, int cds_begin, int cds_end, int phase, position& cp);
 read_t base_range_to_middle_codon(const position& bp, int cds_begin, int cds_end, int offset, position& cp);
