@@ -2,6 +2,7 @@
 #include <string>
 #include <numeric>
 #include <fstream>
+#include <cmath>
 
 #include "reference_info_builder.hpp"
 #include "ribomap_profiler.hpp"
@@ -15,7 +16,8 @@ abundance_rank::abundance_rank(const ribo_profile& rprofile, const transcript_in
   for (size_t t=0; t!=rprofile.number_of_transcripts(); ++t) {
     auto& p = rprofile.get_read_assignments(t);
     double rabd = accumulate(p.begin(), p.end(), double(0));
-    if (rabd != rprofile.get_tot_count(t)) {
+    double rabd_original=rprofile.get_tot_count(t);
+    if (std::fabs(rabd - rabd_original)/rabd_original > 1e-3) {
       cout<<"accumulate abundance not equal tot_count! "<<rabd<<" "<<rprofile.get_tot_count(t)<<" "<<t<<endl;
     }
     if ((not have_spike(p)) or (not have_multiple_spikes(p))) continue;
