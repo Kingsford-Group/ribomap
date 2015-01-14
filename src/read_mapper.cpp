@@ -12,9 +12,10 @@
 #include "abundance_rank.hpp"
 #include "profile_writer.hpp"
 
+const int MAX_READ_LEN = 200;
 //------function forward declarations-------//
 void usage(ez::ezOptionParser& opt);
-bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const string& log_prefix, const string& filetype, const string& offset);
+bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const string& log_prefix, const string& filetype, const string& offset, int lmin, int lmax);
 
 int main(int argc, const char ** argv)
 {
@@ -45,7 +46,8 @@ int main(int argc, const char ** argv)
   opt.add("", 0, 1, 0, "express result", "-e", "--ep");
   opt.add("", 1, 1, 0, "footprint P-site offset", "-p", "--offset");
   opt.add("", 1, 1, 0, "output profile", "-o", "--out");
-
+  opt.add("", 1, 1, 0, "minimum read length for keeping a read", "-lmin", "--min_fplen");
+  opt.add("", 1, 1, 0, "maximum read length for keeping a read", "-lmax", "--max_fplen");
   opt.parse(argc, argv);
 
   if (opt.isSet("-h")) {
@@ -93,10 +95,14 @@ int main(int argc, const char ** argv)
   opt.get("-o")->getString(ofname);
   opt.get("-p")->getString(offset);
 
+  int lmin(0), lmax(0);
+  opt.get("-lmin")->getInt(lmin);
+  opt.get("-lmax")->getInt(lmax);
+
   cout<<"getting transcript info...\n";
   transcript_info tinfo(transcript_fa.c_str(), cds_range.c_str());
   cout<<"total number of transcripts in transcriptome: "<<tinfo.total_count()<<endl;
-  readmapper_pipeline(tinfo, mRNA_bam.c_str(), ribo_bam.c_str(), ifname.c_str(), ofname, filetype, offset);
+  readmapper_pipeline(tinfo, mRNA_bam.c_str(), ribo_bam.c_str(), ifname.c_str(), ofname, filetype, offset, lmin, lmax);
   return 0;
 }
 
@@ -107,7 +113,7 @@ void usage(ez::ezOptionParser& opt)
   std::cout << usage;
 }
 
-bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const string& log_prefix, const string& filetype, const string& offset)
+bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const string& log_prefix, const string& filetype, const string& offset, int lmin, int lmax)
 {
   cout<<"assigning ribo-seq reads..."<<endl;
   cout<<"constructing profile class..."<<endl;
@@ -117,10 +123,10 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
   fp_list_t fp_rec;
   try {
     int psite_offset = stoi(offset);
-    expressed_read_bases_from_bam(fp_rec, ribo_bam, tinfo, rprofile, psite_offset, "-");
+    expressed_read_bases_from_bam(fp_rec, ribo_bam, tinfo, rprofile, lmin, lmax, psite_offset, "-");
   }
   catch (const std::invalid_argument& ia) {
-    expressed_read_bases_from_bam(fp_rec, ribo_bam, tinfo, rprofile, offset.c_str(), "-");
+    expressed_read_bases_from_bam(fp_rec, ribo_bam, tinfo, rprofile, lmin, lmax, offset.c_str(), "-");
   }
   cout<<"assigning reads to frame0 loci..."<<endl;
   rprofile.assign_reads(fp_rec, unordered_set<int>{FRAME0});
@@ -131,7 +137,7 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
   cout<<"number of transcripts in profile class: "<<mprofile.number_of_transcripts()<<endl;
   cout<<"loading reads from bam..."<<endl;
   fp_rec.clear();
-  expressed_read_bases_from_bam(fp_rec, mRNA_bam, tinfo, mprofile, -1, "-");
+  expressed_read_bases_from_bam(fp_rec, mRNA_bam, tinfo, mprofile, lmin, MAX_READ_LEN, -1, "-");
   cout<<"assigning reads..."<<endl;
   mprofile.assign_reads(fp_rec,unordered_set<int>{UTR5, FRAME0, FRAME1, FRAME2, UTR3});
   cout<<"rank transcripts..."<<endl;

@@ -212,35 +212,35 @@ read_t base_range_to_middle_codon(const position& bp, int cds_begin, int cds_end
   }
 }
 
-bool expressed_read_codon_ranges_from_bam(fp_list_t& fp_codon_list, const char *fn, const transcript_info& tinfo, const ribo_profile& profiler, int offset, const string& cnt_sep)
+bool expressed_read_codon_ranges_from_bam(fp_list_t& fp_codon_list, const char *fn, const transcript_info& tinfo, const ribo_profile& profiler, int lmin, int lmax, int offset, const string& cnt_sep)
 {
   cout<<"getting alignment records..."<<endl;
   rd_rec_map_t rd_rec;
-  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep);
+  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep, lmin, lmax);
   cout<<"total number of reads: "<<rd_rec.size()<<endl;
   cout<<"convert read loci to codon ranges...\n";
   alignment_regions_to_codon_ranges(rd_rec, tinfo, fp_codon_list, offset);
   return false;
 }
 
-bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, int offset, const string& cnt_sep)
+bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, int lmin, int lmax, int offset, const string& cnt_sep)
 {
   cout<<"getting alignment records..."<<endl;
   rd_rec_map_t rd_rec;
-  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep);
+  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep, lmin, lmax);
   cout<<"total number of reads: "<<rd_rec.size()<<endl;
   cout<<"getting read type and p-sites...\n";
   assign_P_site(rd_rec, tinfo, fp_rec_out, offset);
   return false;
 }
 
-bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, const char* offset_fn, const string& cnt_sep)
+bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, int lmin, int lmax, const char* offset_fn, const string& cnt_sep)
 {
   cout<<"getting readlen mapping to P site offset..."<<endl;
   rlen2psite_t rl2p = get_readlen_psite_map(offset_fn);
   cout<<"getting alignment records..."<<endl;
   rd_rec_map_t rd_rec;
-  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep);
+  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep, lmin, lmax);
   cout<<"total number of reads: "<<rd_rec.size()<<endl;
   cout<<"getting read type and p-sites...\n";
   assign_P_site(rd_rec, tinfo, fp_rec_out, rl2p);
