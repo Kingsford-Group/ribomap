@@ -15,14 +15,14 @@ abundance_rank::abundance_rank(const ribo_profile& rprofile, const transcript_in
   vector<rid_t> refID_vec(rprofile.get_expressed_transcript_ids());
   for (size_t t=0; t!=rprofile.number_of_transcripts(); ++t) {
     auto& p = rprofile.get_read_assignments(t);
-    double rabd = accumulate(p.begin(), p.end(), double(0));
-    double rabd_original=rprofile.get_tot_count(t);
-    if (std::fabs(rabd - rabd_original)/rabd_original > 1e-3) {
-      cout<<"accumulate abundance not equal tot_count! "<<rabd<<" "<<rprofile.get_tot_count(t)<<" "<<t<<endl;
-    }
+    double rabd = rprofile.get_tot_count(t);
+    // double rabd_sum = accumulate(p.begin(), p.end(), double(0));
+    // if (std::fabs(rabd - rabd_sum)/rabd_original > 1e-3) {
+    //   cout<<"accumulate abundance not equal tot_count! "<<rabd<<" "<<rprofile.get_tot_count(t)<<" "<<t<<endl;
+    // }
     if ((not have_spike(p)) or (not have_multiple_spikes(p))) continue;
     string tid = tinfo.get_tid(refID_vec[t]);
-    double tabd = rprofile.get_tot_abundance(t);
+    double tabd = rprofile.get_tot_abundance(t)*rprofile.len(t);
     tlist.emplace_back(transcript_rank{tid, tabd, rabd, 0, 0, 0});
   } 
 }
