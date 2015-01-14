@@ -272,7 +272,7 @@ fi
 # step 5: run ribomap
 #=============================
 ribomap_out=${output_dir}/${ribo_core}
-options="--mrnabam ${rna_bam} --ribobam ${ribo_bam} --fasta ${transcript_fa} --sf ${sm_out} --offset ${offset} --out ${ribomap_out}"
+options="--mrnabam ${rna_bam} --ribobam ${ribo_bam} --fasta ${transcript_fa} --sf ${sm_out} --offset ${offset} --out ${ribomap_out} --min_fplen ${min_fplen} --max_fplen ${max_fplen}"
 if [ ! -z "${cds_range}" ] && [ -f ${cds_range} ]; then
     options+=" --cds_range ${cds_range}"
 fi
