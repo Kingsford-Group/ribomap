@@ -15,7 +15,7 @@
 const int MAX_READ_LEN = 200;
 //------function forward declarations-------//
 void usage(ez::ezOptionParser& opt);
-bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const string& log_prefix, const string& filetype, const string& offset, int lmin, int lmax);
+bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, int lmin, int lmax, const string& offset, const char* tabd_fname, const string& tabd_type, double tabd_cutoff, const string& log_prefix);
 
 int main(int argc, const char ** argv)
 {
@@ -23,7 +23,7 @@ int main(int argc, const char ** argv)
   ez::ezOptionParser opt;
   opt.overview = "assign reads to transcript locations based on the estimated transcript abundance, output a per-transcript profile file.";
   opt.syntax = "riboprof [options]";
-  opt.example = "riboprof --mrnabam mRNA_bam --ribobam ribo_bam --fasta transcript_fasta --cds_range cds_range_file --sf salmon_result --offset footprint_offset --out output_profile\n";
+  opt.example = "riboprof --fasta transcript_fasta --cds_range cds_range_file --mrnabam mRNA_bam --ribobam ribo_bam --min_fplen 25 --max_fplen 33 --offset footprint_offset --sf salmon_result --tabd_cutoff 0.01  --out output_prefix\n";
   opt.footer = "";
 
   opt.add( "", // Default.
@@ -39,15 +39,16 @@ int main(int argc, const char ** argv)
 
   opt.add("", 1, 1, 0, "RNAseq alignment bam", "-m", "--mrnabam");
   opt.add("", 1, 1, 0, "riboseq alignment bam", "-r", "--ribobam");
+  opt.add("", 1, 1, 0, "minimum read length for keeping a read", "-lmin", "--min_fplen");
+  opt.add("", 1, 1, 0, "maximum read length for keeping a read", "-lmax", "--max_fplen");
+  opt.add("", 1, 1, 0, "footprint P-site offset", "-p", "--offset");
   opt.add("", 1, 1, 0, "transcript fasta", "-f", "--fasta");
   opt.add("", 0, 1, 0, "cds range file", "-cds", "--cds_range");
   opt.add("", 0, 1, 0, "sailfish result", "-s", "--sf");
   opt.add("", 0, 1, 0, "cufflinks result", "-c", "--cl");
   opt.add("", 0, 1, 0, "express result", "-e", "--ep");
-  opt.add("", 1, 1, 0, "footprint P-site offset", "-p", "--offset");
+  opt.add("", 1, 1, 0, "transcript abundance cutoff", "-threshold", "--tabd_cutoff");
   opt.add("", 1, 1, 0, "output profile", "-o", "--out");
-  opt.add("", 1, 1, 0, "minimum read length for keeping a read", "-lmin", "--min_fplen");
-  opt.add("", 1, 1, 0, "maximum read length for keeping a read", "-lmax", "--max_fplen");
   opt.parse(argc, argv);
 
   if (opt.isSet("-h")) {
@@ -65,44 +66,43 @@ int main(int argc, const char ** argv)
     return 1;
   }
 
-  string mRNA_bam, ribo_bam, transcript_fa, cds_range(""), ifname, ofname, filetype, offset;
-  opt.get("-m")->getString(mRNA_bam);
-  opt.get("-r")->getString(ribo_bam);
+  string transcript_fa, cds_range(""), mRNA_bam, ribo_bam, offset, tabd_fname, tabd_type, oprefix;
   opt.get("-f")->getString(transcript_fa);
   if (opt.isSet("-cds"))
     opt.get("-cds")->getString(cds_range);
   else
     cerr<<"cds_range file not provided, assume transcript fasta only contains cds sequences.\n";
-
+  opt.get("-m")->getString(mRNA_bam);
+  opt.get("-r")->getString(ribo_bam);
+  opt.get("-p")->getString(offset);
   // get at least one transcript abundance file name
   if (opt.isSet("-s")) {
-    opt.get("-s")->getString(ifname);
-    filetype = "sailfish";
+    opt.get("-s")->getString(tabd_fname);
+    tabd_type = "sailfish";
   }
   else if (opt.isSet("-c")) {
-    opt.get("-c")->getString(ifname);
-    filetype = "cufflinks";
+    opt.get("-c")->getString(tabd_fname);
+    tabd_type = "cufflinks";
   }
   else if (opt.isSet("-e")) {
-    opt.get("-e")->getString(ifname);
-    filetype = "express";
+    opt.get("-e")->getString(tabd_fname);
+    tabd_type = "express";
   }
   else {
     cerr<<"ERROR: no transcript abundance file provided!\n";
     return 1;
   }
-
-  opt.get("-o")->getString(ofname);
-  opt.get("-p")->getString(offset);
-
+  opt.get("-o")->getString(oprefix);
   int lmin(0), lmax(0);
   opt.get("-lmin")->getInt(lmin);
   opt.get("-lmax")->getInt(lmax);
+  double tabd_cutoff(0);
+  opt.get("-threshold")->getDouble(tabd_cutoff);
 
   cout<<"getting transcript info...\n";
   transcript_info tinfo(transcript_fa.c_str(), cds_range.c_str());
   cout<<"total number of transcripts in transcriptome: "<<tinfo.total_count()<<endl;
-  readmapper_pipeline(tinfo, mRNA_bam.c_str(), ribo_bam.c_str(), ifname.c_str(), ofname, filetype, offset, lmin, lmax);
+  readmapper_pipeline(tinfo, mRNA_bam.c_str(), ribo_bam.c_str(), lmin, lmax, offset, tabd_fname.c_str(), tabd_type, tabd_cutoff, oprefix);
   return 0;
 }
 
@@ -113,11 +113,11 @@ void usage(ez::ezOptionParser& opt)
   std::cout << usage;
 }
 
-bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, const char* ifname, const string& log_prefix, const string& filetype, const string& offset, int lmin, int lmax)
+bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, const char* ribo_bam, int lmin, int lmax, const string& offset, const char* tabd_fname, const string& tabd_type, double tabd_cutoff, const string& log_prefix)
 {
   cout<<"assigning ribo-seq reads..."<<endl;
   cout<<"constructing profile class..."<<endl;
-  ribo_profile rprofile(tinfo, ifname, filetype, 0.01);
+  ribo_profile rprofile(tinfo, tabd_fname, tabd_type, tabd_cutoff);
   cout<<"number of transcripts in profile class: "<<rprofile.number_of_transcripts()<<endl;
   cout<<"loading reads from bam..."<<endl;
   fp_list_t fp_rec;
@@ -133,7 +133,7 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
   cout<<"assigning reads to non-frame0 loci..."<<endl;
   rprofile.assign_reads(fp_rec, unordered_set<int>{UTR5, FRAME1, FRAME2, UTR3});
   cout<<"assigning RNA-seq reads..."<<endl;
-  ribo_profile mprofile(tinfo, ifname, filetype, 0.01);
+  ribo_profile mprofile(tinfo, tabd_fname, tabd_type, tabd_cutoff);
   cout<<"number of transcripts in profile class: "<<mprofile.number_of_transcripts()<<endl;
   cout<<"loading reads from bam..."<<endl;
   fp_rec.clear();
