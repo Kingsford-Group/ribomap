@@ -25,6 +25,8 @@ void generate_base_report(const string& fname, const ribo_profile& rprofile, con
   // logfile.setf(ios::scientific);
   // logfile.precision(3);
   for (size_t t=0; t!=rprofile.number_of_transcripts(); ++t) {
+    double rabd = rprofile.get_tot_count(t);
+    if (rabd==0) continue;
     rid_t refID(refID_vec[t]);
     vector<double> rp=rprofile.get_read_assignments(t);
     vector<double> mp=mprofile.get_read_assignments(t);
@@ -63,6 +65,8 @@ void generate_codon_report(const string& fname, const ribo_profile& rprofile, co
   // logfile.setf(ios::scientific);
   // logfile.precision(3);
   for (size_t t=0; t!=rprofile.number_of_transcripts(); ++t) {
+    double rabd = rprofile.get_tot_count(t);
+    if (rabd==0) continue;
     rid_t refID(refID_vec[t]);
     vector<double> rp=generate_codon_profile(refID, rprofile, tinfo);
     vector<double> mp=generate_codon_profile(refID, mprofile, tinfo);
