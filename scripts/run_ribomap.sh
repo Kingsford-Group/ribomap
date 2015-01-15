@@ -9,6 +9,7 @@ nproc=15 # threads
 nmismatch=1
 offset=12 # P-site offset
 force=false
+tabd_cutoff=0.01
 #=============================
 # pre-filled parameters
 #=============================
@@ -98,6 +99,10 @@ do
 	    output_dir=${work_dir}outputs
 	    shift
 	    ;;
+	--nproc)
+	    nproc="$1"
+	    shift
+	    ;;
 	--adapter)
 	    adapter="$1"
 	    shift
@@ -110,16 +115,16 @@ do
 	    max_fplen="$1"
 	    shift
 	    ;;
-	--nproc)
-	    nproc="$1"
+	--offset)
+	    offset="$1"
 	    shift
 	    ;;
 	--nmismatch)
 	    nmismatch="$1"
 	    shift
 	    ;;
-	--offset)
-	    offset="$1"
+	--tabd_cutoff)
+	    tabd_cutoff="$1"
 	    shift
 	    ;;
 	--fasta_dir)
@@ -272,7 +277,7 @@ fi
 # step 5: run ribomap
 #=============================
 ribomap_out=${output_dir}/${ribo_core}
-options="--mrnabam ${rna_bam} --ribobam ${ribo_bam} --fasta ${transcript_fa} --sf ${sm_out} --offset ${offset} --out ${ribomap_out} --min_fplen ${min_fplen} --max_fplen ${max_fplen}"
+options="--fasta ${transcript_fa} --mrnabam ${rna_bam} --ribobam ${ribo_bam} --min_fplen ${min_fplen} --max_fplen ${max_fplen} --offset ${offset} --sf ${sm_out} --tabd_cutoff ${tabd_cutoff} --out ${ribomap_out} "
 if [ ! -z "${cds_range}" ] && [ -f ${cds_range} ]; then
     options+=" --cds_range ${cds_range}"
 fi
