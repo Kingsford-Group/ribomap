@@ -191,30 +191,7 @@ rna_core=${rna_core%%.*}
 ribo_core=${riboseq_fq##*/}
 ribo_core=${ribo_core%%.*}
 #=============================
-# step 1: preprocess reads
-#=============================
-echo "preprocessing reads (quality control + trim adapter + trim first base + collapse duplicate reads + fastq to fasta"
-#fastx_pipe="fastx_clipper -Q33 -a ${adapter} -l ${min_fplen} -c -n -v | fastq_to_fasta -v"
-fastx_pipe="fastq_to_fasta -Q33 -v"
-rna_fa=${fasta_dir}${rna_core}.fa
-ribo_fa=${fasta_dir}${ribo_core}.fa
-if  [ "${force}" = true ] || [ ! -f ${rna_fa} ]; then
-    zcat ${rnaseq_fq} | ${fastx_pipe} -o ${rna_fa}
-    check_file ${rna_fa} "pipeline failed at preprocessing rnaseq_fq: ${rnaseq_fq}!"
-fi
-if [ "${force}" = true ] || [ ! -f ${ribo_fa} ]; then
-    #zcat ${riboseq_fq} | ${fastx_pipe} | fastx_collapser -v -o ${ribo_fa}
-    zcat ${riboseq_fq} | ${fastx_pipe} -o ${ribo_fa}
-    check_file ${ribo_fa} "pipeline failed at preprocessing riboseq_fq: ${riboseq_fq}!"
-fi
-
-# ribo_size_fa=${fasta_dir}${ribo_core}-size.fa
-# if [ ! -f ${ribo_size_fa} ] || [ "${force}" = true ]; then
-#     python ${src_dir}/filter_reads_by_size.py ${ribo_fa} ${ribo_size_fa} ${min_fplen} ${max_fplen}
-#     check_file ${ribo_size_fa} "pipeline failed at filtering riboseq with the wrong size!"
-# fi
-#=============================
-# step 2: filter rrna
+# step 1: filter rrna
 #=============================
 ornaprefix=${tmp_dir}${rna_core}_rrna_
 oriboprefix=${tmp_dir}${ribo_core}_rrna_
@@ -229,12 +206,22 @@ if [ ! -z "${contaminant_fa}" ] && [ -f ${contaminant_fa} ]; then
     fi
     if [ "${force}" = true ] || [ ! -f ${rna_nrrna_fa} ];  then
 	echo "filtering contaminants in RNA_seq..."
-	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${rna_fa} --outFileNamePrefix ${ornaprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS${align_params} > /dev/null
+	if [ "${rnaseq_fq##*.}" = gz ]; then
+	    filter_params="--readFilesCommand zcat "+${align_params}
+	else
+	    filter_params=${align_params}
+	fi
+	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${rnaseq_fq} --outFileNamePrefix ${ornaprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${filter_params} > /dev/null
 	check_file ${rna_nrrna_fa} "pipeline failed at filtering rrna in RNA_seq!"
     fi
     if [ "${force}" = true ] || [ ! -f ${ribo_nrrna_fa} ];  then
 	echo "filtering contaminants in ribo_seq..."
-	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${ribo_fa} --outFileNamePrefix ${oriboprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${align_params} > /dev/null
+	if [ "${riboseq_fq##*.}" = gz ]; then
+	    filter_params="--readFilesCommand zcat "+${align_params}
+	else
+	    filter_params=${align_params}
+	fi
+	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${riboseq_fq} --outFileNamePrefix ${oriboprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${filter_params} > /dev/null
 	check_file ${ribo_nrrna_fa} "pipeline failed at filtering rrna in ribo_seq!"
     fi
 else
@@ -242,7 +229,7 @@ else
     # TODO change rna_nrna_fa file name here
 fi
 #========================================
-# step 3: map to transcriptome
+# step 2: map to transcriptome
 #========================================
 ornaprefix=${tmp_dir}${rna_core}_transcript_
 oriboprefix=${tmp_dir}${ribo_core}_transcript_
@@ -265,7 +252,7 @@ if [ "${force}" = true ] || [ ! -f ${ribo_bam} ]; then
     check_file ${ribo_bam} "pipeline failed at mapping ribo_seq to transcriptome!"
 fi
 #============================================
-# step 4: salmon expression quantification
+# step 3: salmon expression quantification
 #============================================
 sm_out=${sm_odir}/quant_bias_corrected.sf
 if [ "${force}" = true ] || [ ! -f ${sm_out} ]; then
@@ -274,7 +261,7 @@ if [ "${force}" = true ] || [ ! -f ${sm_out} ]; then
     check_file ${sm_out} "pipeline failed at expression quantification!"
 fi
 #=============================
-# step 5: run ribomap
+# step 4: run ribomap
 #=============================
 ribomap_out=${output_dir}/${ribo_core}
 options="--fasta ${transcript_fa} --mrnabam ${rna_bam} --ribobam ${ribo_bam} --min_fplen ${min_fplen} --max_fplen ${max_fplen} --offset ${offset} --sf ${sm_out} --tabd_cutoff ${tabd_cutoff} --out ${ribomap_out} "
