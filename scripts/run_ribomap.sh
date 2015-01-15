@@ -58,6 +58,39 @@ check_file ()
     fi
 }
 
+# filter out reads that can be aligned to contaminants
+# filter_seq $input_reads $output_prefix $output_fa
+filter_reads ()
+{
+    if [ "${force}" = true ] || [ ! -f "$3" ];  then
+	if [ "${1##*.}" = gz ]; then
+	    filter_params="--readFilesCommand zcat "${align_params}
+	else
+	    filter_params=${align_params}
+	fi
+	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn $1 --outFileNamePrefix $2 --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${filter_params} > /dev/null
+	check_file "$3" "pipeline failed at filtering rrna!"
+    else
+	echo "filtering skipped."
+    fi
+}
+
+# align reads to the transcriptome
+# align_reads $input_reads $output_prefix $output_bam
+align_reads ()
+{
+    if [ "${force}" = true ] || [ ! -f "$3" ]; then
+	if [ "${1##*.}" = gz ]; then
+	    filter_params="--readFilesCommand zcat "${align_params}
+	else
+	    filter_params=${align_params}
+	fi
+	STAR --runThreadN $nproc --genomeDir ${transcript_idx} --readFilesIn $1 --outFileNamePrefix $2 ${SAM_params} ${filter_params}
+	check_file "$3" "pipeline failed at mapping reads to transcriptome!"
+    else
+	echo "alignment skipped."
+    fi
+}
 #=============================
 # read in command line args
 # space separated
@@ -204,29 +237,14 @@ if [ ! -z "${contaminant_fa}" ] && [ -f ${contaminant_fa} ]; then
 	mkdir -p ${rrna_idx}
 	STAR --runThreadN $nproc --runMode genomeGenerate --genomeDir ${rrna_idx} --genomeFastaFiles ${contaminant_fa} --genomeSAindexNbases 5 --genomeChrBinNbits 11
     fi
-    if [ "${force}" = true ] || [ ! -f ${rna_nrrna_fa} ];  then
-	echo "filtering contaminants in RNA_seq..."
-	if [ "${rnaseq_fq##*.}" = gz ]; then
-	    filter_params="--readFilesCommand zcat "+${align_params}
-	else
-	    filter_params=${align_params}
-	fi
-	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${rnaseq_fq} --outFileNamePrefix ${ornaprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${filter_params} > /dev/null
-	check_file ${rna_nrrna_fa} "pipeline failed at filtering rrna in RNA_seq!"
-    fi
-    if [ "${force}" = true ] || [ ! -f ${ribo_nrrna_fa} ];  then
-	echo "filtering contaminants in ribo_seq..."
-	if [ "${riboseq_fq##*.}" = gz ]; then
-	    filter_params="--readFilesCommand zcat "+${align_params}
-	else
-	    filter_params=${align_params}
-	fi
-	STAR --runThreadN $nproc --genomeDir ${rrna_idx} --readFilesIn ${riboseq_fq} --outFileNamePrefix ${oriboprefix} --outStd SAM --outReadsUnmapped Fastx --outSAMmode NoQS ${filter_params} > /dev/null
-	check_file ${ribo_nrrna_fa} "pipeline failed at filtering rrna in ribo_seq!"
-    fi
+    echo "filtering contaminants in RNA_seq..."
+    filter_reads ${rnaseq_fq} ${ornaprefix} ${rna_nrrna_fa}
+    echo "filtering contaminants in ribo_seq..."
+    filter_reads ${riboseq_fq} ${oriboprefix} ${ribo_nrrna_fa}
 else
     echo "skipped filter read step."
-    # TODO change rna_nrna_fa file name here
+    rna_nrrna_fa=${rnaseq_fq}
+    ribo_nrrna_fa=${riboseq_fq}
 fi
 #========================================
 # step 2: map to transcriptome
@@ -241,16 +259,10 @@ if [ "${force}" = true ] || [ ! -d ${transcript_idx} ];  then
     mkdir -p ${transcript_idx}
     STAR --runThreadN $nproc --runMode genomeGenerate --genomeDir ${transcript_idx} --genomeFastaFiles ${transcript_fa} --genomeSAindexNbases 11 --genomeChrBinNbits 12
 fi
-if [ "${force}" = true ] || [ ! -f ${rna_bam} ]; then
-    echo "aligning RNA_seq to transcriptome..."
-    STAR --runThreadN $nproc --genomeDir ${transcript_idx} --readFilesIn ${rna_nrrna_fa} --outFileNamePrefix ${ornaprefix} ${SAM_params} ${align_params}
-    check_file ${rna_bam} "pipeline failed at mapping RNA_seq to transcriptome!"
-fi
-if [ "${force}" = true ] || [ ! -f ${ribo_bam} ]; then
-    echo "aligning ribo_seq to transcriptome..."
-    STAR --runThreadN $nproc --genomeDir ${transcript_idx} --readFilesIn ${ribo_nrrna_fa} --outFileNamePrefix ${oriboprefix} ${SAM_params} ${align_params}
-    check_file ${ribo_bam} "pipeline failed at mapping ribo_seq to transcriptome!"
-fi
+echo "aligning RNA_seq to transcriptome..."
+align_reads ${rna_nrrna_fa} ${ornaprefix} ${rna_bam}
+echo "aligning ribo_seq to transcriptome..."
+align_reads ${ribo_nrrna_fa} ${oriboprefix} ${ribo_bam}
 #============================================
 # step 3: salmon expression quantification
 #============================================
