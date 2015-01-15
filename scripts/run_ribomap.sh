@@ -210,12 +210,12 @@ elif [ ! -f ${cds_range} ]; then
     error_msg "cds range file not exist! ${cds_range}" false
 fi
 
-#=============================
+#============================================
 # make directories
-#=============================
+#============================================
 # star params
 align_params="--clip3pAdapterSeq ${adapter} --seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
-SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS" # --outSAMprimaryFlag AllBestScore"
+SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS --outSAMattributes All" # --outSAMprimaryFlag AllBestScore"
 mkdir -p ${fasta_dir}
 mkdir -p ${tmp_dir}
 mkdir -p ${output_dir}
@@ -223,9 +223,9 @@ rna_core=${rnaseq_fq##*/}
 rna_core=${rna_core%%.*}
 ribo_core=${riboseq_fq##*/}
 ribo_core=${ribo_core%%.*}
-#=============================
+#============================================
 # step 1: filter rrna
-#=============================
+#============================================
 ornaprefix=${tmp_dir}${rna_core}_rrna_
 oriboprefix=${tmp_dir}${ribo_core}_rrna_
 rna_nrrna_fa=${ornaprefix}Unmapped.out.mate1
@@ -246,9 +246,9 @@ else
     rna_nrrna_fa=${rnaseq_fq}
     ribo_nrrna_fa=${riboseq_fq}
 fi
-#========================================
+#============================================
 # step 2: map to transcriptome
-#========================================
+#============================================
 ornaprefix=${tmp_dir}${rna_core}_transcript_
 oriboprefix=${tmp_dir}${ribo_core}_transcript_
 rna_bam=${ornaprefix}Aligned.out.bam
@@ -272,9 +272,9 @@ if [ "${force}" = true ] || [ ! -f ${sm_out} ]; then
     salmon quant -t ${transcript_fa} -l U -a ${rna_bam} -o ${sm_odir} -p $nproc --bias_correct
     check_file ${sm_out} "pipeline failed at expression quantification!"
 fi
-#=============================
+#============================================
 # step 4: run ribomap
-#=============================
+#============================================
 ribomap_out=${output_dir}/${ribo_core}
 options="--fasta ${transcript_fa} --mrnabam ${rna_bam} --ribobam ${ribo_bam} --min_fplen ${min_fplen} --max_fplen ${max_fplen} --offset ${offset} --sf ${sm_out} --tabd_cutoff ${tabd_cutoff} --out ${ribomap_out} "
 if [ ! -z "${cds_range}" ] && [ -f ${cds_range} ]; then
