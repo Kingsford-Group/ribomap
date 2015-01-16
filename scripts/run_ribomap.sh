@@ -215,7 +215,7 @@ fi
 #============================================
 # star params
 align_params="--clip3pAdapterSeq ${adapter} --seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
-SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS --outSAMattributes All" # --outSAMprimaryFlag AllBestScore"
+SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS --outSAMattributes NH NM" # --outSAMprimaryFlag AllBestScore"
 mkdir -p ${fasta_dir}
 mkdir -p ${tmp_dir}
 mkdir -p ${output_dir}
