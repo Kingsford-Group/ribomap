@@ -284,6 +284,7 @@ ribomap_out=${output_dir}/${ribo_core}
 options="--fasta ${transcript_fa} --mrnabam ${rna_bam} --ribobam ${ribo_bam} --min_fplen ${min_fplen} --max_fplen ${max_fplen} --offset ${offset} --sf ${sm_out} --tabd_cutoff ${tabd_cutoff} --out ${ribomap_out} "
 if [ ! -z "${cds_range}" ] && [ -f ${cds_range} ]; then
     options+=" --cds_range ${cds_range}"
+fi
 if [ "${useSecondary}" = true ]; then
     options+=" --useSecondary"
 fi
