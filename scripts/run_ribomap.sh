@@ -10,6 +10,7 @@ nmismatch=1
 offset=12 # P-site offset
 force=false
 tabd_cutoff=0.01
+useSecondary=true
 #=============================
 # pre-filled parameters
 #=============================
@@ -185,6 +186,9 @@ do
 	--force)
 	    force="$1"
 	    shift
+	--useSecondary)
+	    useSecondary="$1"
+	    shift
 	    ;;
 	*)
             # unknown option
@@ -279,6 +283,8 @@ ribomap_out=${output_dir}/${ribo_core}
 options="--fasta ${transcript_fa} --mrnabam ${rna_bam} --ribobam ${ribo_bam} --min_fplen ${min_fplen} --max_fplen ${max_fplen} --offset ${offset} --sf ${sm_out} --tabd_cutoff ${tabd_cutoff} --out ${ribomap_out} "
 if [ ! -z "${cds_range}" ] && [ -f ${cds_range} ]; then
     options+=" --cds_range ${cds_range}"
+if [ "${useSecondary}" = true ]; then
+    options+=" --useSecondary"
 fi
 if [ "${force}" = true ] || [ ! -f ${ribomap_out}.base ]; then
     echo "running riboprof..."
