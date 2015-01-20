@@ -25,7 +25,7 @@ def trim_fasta_to_fastq(infn,outfn,trimlen):
     line = ifile.readline()
     while line:
         if line.startswith('>'):
-            header = line.lstrip('>')
+            header = line.lstrip('>').split()[0]+'\n'
             seq = ifile.readline()
             if len(seq)>trimlen+1:
                 seq = seq[:trimlen]+'\n'
