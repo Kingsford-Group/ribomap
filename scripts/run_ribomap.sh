@@ -21,8 +21,6 @@ export PATH=${bin_dir}:$PATH
 export LD_LIBRARY_PATH=${lib_dir}:$LD_LIBRARY_PATH
 export DYLD_LIBRARY_PATH=${lib_dir}:$DYLD_LIBRARY_PATH
 work_dir=${src_dir}/../
-# preprocess
-fasta_dir=${work_dir}data/fasta/
 # star outputs
 tmp_dir=${work_dir}alignment/
 # salmon
@@ -123,8 +121,6 @@ do
 	    ;;
 	--work_dir)
 	    work_dir="$1"
-	    # preprocess
-	    fasta_dir=${work_dir}data/fasta/
 	    # star outputs
 	    tmp_dir=${work_dir}alignment/
 	    # salmon
@@ -159,10 +155,6 @@ do
 	    ;;
 	--tabd_cutoff)
 	    tabd_cutoff="$1"
-	    shift
-	    ;;
-	--fasta_dir)
-	    fasta_dir="$1"
 	    shift
 	    ;;
 	--star_idx_dir)
@@ -221,7 +213,6 @@ fi
 # star params
 align_params="--clip3pAdapterSeq ${adapter} --seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
 SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS --outSAMattributes NH NM" # --outSAMprimaryFlag AllBestScore"
-mkdir -p ${fasta_dir}
 mkdir -p ${tmp_dir}
 mkdir -p ${output_dir}
 rna_core=${rnaseq_fq##*/}
