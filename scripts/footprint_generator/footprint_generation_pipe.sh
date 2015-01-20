@@ -8,7 +8,7 @@ output_dir="${work_dir}"synthetic_data/
 ref_to_rlsim="${output_dir}"ref_with_abd.fa
 frags_from_rlsim="${output_dir}"synth_rnaseq_frags.fa
 reads_from_rlsim="${output_dir}"synth_rnaseq.fq
-read_cnt=100000000
+read_cnt=20000000
 nproc=15
 read_len=30
 offset=12
@@ -23,26 +23,38 @@ mkdir -p ${output_dir}
 #===========================================
 # Step 1: append abdance to reference fasta
 #===========================================
-#python make_ref_fa_with_abd.py ${sm_old_dir}quant_bias_corrected.sf ${ref_old} ${ref_to_rlsim}
+echo "preparing reference fasta for rlsim..."
+python make_ref_fa_with_abd.py ${sm_fn} ${ref_old} ${ref_to_rlsim}
 #===========================================
 # Step 2: synthetically generate fragments
 #===========================================
-#${rlsim_exe} -n ${read_cnt} -t ${nproc} ${ref_to_rlsim} > ${frags_from_rlsim}
+echo "running rlism..."
+${rlsim_exe} -n ${read_cnt} -t ${nproc} ${ref_to_rlsim} > ${frags_from_rlsim}
 #===========================================
 # Step 3: trim fragments to read length
 #===========================================
-#python read_trimmer.py ${frags_from_rlsim} ${reads_from_rlsim} ${read_len}
+echo "trimming fragments to generate single-end rnaseq reads..."
+python read_trimmer.py ${frags_from_rlsim} ${reads_from_rlsim} ${read_len}
 #===========================================
 # Ribo-seq generation
 #===========================================
 #===========================================
 # Step 1: generate footprint reads
 #===========================================
-#${footprint_generator} ${ref_old} ${cds_range} ${sm_fn} ${erate_fn} ${ilow} ${ihigh} ${read_cnt} ${read_len} ${offset} ${output_dir}synth_riboseq.profile ${output_dir}synth_riboseq.fq ${nproc}
+echo "generating riboseq reads..."
+${footprint_generator} ${ref_old} ${cds_range} ${sm_fn} ${erate_fn} ${ilow} ${ihigh} ${read_cnt} ${read_len} ${offset} ${output_dir}synth_riboseq.profile ${output_dir}synth_riboseq.fq ${nproc}
 #===========================================
 # Step 2: add errors to reads
 #===========================================
+echo "adding errors to riboseq..."
 for rate in 0.005 0.01 0.02; do
-    python mutate_fq.py --in=${output_dir}synth_riboseq.fq --out=${output_dir}synth_riboseq_${rate}.fq --rate=${rate}
+    python mutate_fq.py --in=${output_dir}synth_riboseq.fq --out=${output_dir}synth_riboseq_${rate##*.}.fq --rate=${rate}
 done
-
+#===========================================
+# Step 3: zip files
+#===========================================
+echo "zipping fastq files..."
+for file in ${output_dir}*.fq; do
+    echo "compressing ${file}..."
+    gzip -f ${file}
+done
