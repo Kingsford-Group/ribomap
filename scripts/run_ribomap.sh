@@ -186,6 +186,7 @@ do
 	--force)
 	    force="$1"
 	    shift
+	    ;;
 	--useSecondary)
 	    useSecondary="$1"
 	    shift
