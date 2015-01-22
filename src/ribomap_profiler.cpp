@@ -61,7 +61,7 @@ void ribo_profile::sailfish_parser(const transcript_info& tinfo, const char* sf_
       catch (const std::out_of_range& oor) { tpm = 0; }
       ifile.ignore(numeric_limits<streamsize>::max(), '\n');
       i = 0;
-      if (tpm < abundance_cutoff) continue;
+      if (tpm <= abundance_cutoff) continue;
       rid_t rid(tinfo.get_refID(tid));
       if (rid == tinfo.total_count()) continue;
       int tlen(tinfo.tlen(rid));
@@ -107,7 +107,7 @@ void ribo_profile::cufflinks_parser(const transcript_info& tinfo, const char* cl
       catch (const std::out_of_range& oor) { fpkm = 0; }
       ifile.ignore(numeric_limits<streamsize>::max(), '\n');
       i = 0;
-      if (fpkm < abundance_cutoff) continue;
+      if (fpkm <= abundance_cutoff) continue;
       rid_t rid(tinfo.get_refID(tid));
       if (rid == tinfo.total_count()) continue;
       int tlen(tinfo.tlen(rid));
@@ -152,7 +152,7 @@ void ribo_profile::express_parser(const transcript_info& tinfo, const char* ep_f
       catch (const std::out_of_range& oor) { fpkm = 0; }
       ifile.ignore(numeric_limits<streamsize>::max(), '\n');
       i = 0;
-      if (fpkm < abundance_cutoff) continue;
+      if (fpkm <= abundance_cutoff) continue;
       rid_t rid(tinfo.get_refID(tid));
       if (rid == tinfo.total_count()) continue;
       int tlen(tinfo.tlen(rid));
