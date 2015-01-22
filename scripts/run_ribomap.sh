@@ -11,6 +11,7 @@ offset=12 # P-site offset
 force=false
 tabd_cutoff=0.01
 useSecondary=true
+softclip=true
 #=============================
 # pre-filled parameters
 #=============================
@@ -183,6 +184,8 @@ do
 	    useSecondary="$1"
 	    shift
 	    ;;
+	--softClipping)
+	    softclip="$1"
 	*)
             # unknown option
 	    ;;
@@ -212,6 +215,9 @@ fi
 #============================================
 # star params
 align_params="--clip3pAdapterSeq ${adapter} --seedSearchLmax 10 --outFilterMultimapScoreRange 0 --outFilterMultimapNmax 255 --outFilterMismatchNmax ${nmismatch} --outFilterIntronMotifs RemoveNoncanonical"
+if [ "${softclip}" = false ]; then
+    align_params=${align_params}" --alignEndsType EndToEnd"
+fi
 SAM_params="--outSAMtype BAM Unsorted --outSAMmode NoQS --outSAMattributes NH NM" # --outSAMprimaryFlag AllBestScore"
 mkdir -p ${tmp_dir}
 mkdir -p ${output_dir}
