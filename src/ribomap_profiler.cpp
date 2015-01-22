@@ -190,6 +190,7 @@ bool ribo_profile::assign_reads(const fp_list_t& fp_base_list, const unordered_s
     vector<double> prob(loci.size(), 1);
     double tot_prob(1);
     if (prob.size() > 1) {
+      tot_prob = 0;
       for (size_t i=0; i!=prob.size(); ++i) {
 	const position& loc(loci[i]);
 	rid_t refID(loc.refID);
