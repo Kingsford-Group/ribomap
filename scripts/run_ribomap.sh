@@ -9,7 +9,7 @@ nproc=15 # threads
 nmismatch=1
 offset=12 # P-site offset
 force=false
-tabd_cutoff=0.01
+tabd_cutoff=-1
 useSecondary=true
 softclip=true
 #=============================
