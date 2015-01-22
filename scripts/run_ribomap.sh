@@ -186,6 +186,8 @@ do
 	    ;;
 	--softClipping)
 	    softclip="$1"
+	    shift
+	    ;;
 	*)
             # unknown option
 	    ;;
