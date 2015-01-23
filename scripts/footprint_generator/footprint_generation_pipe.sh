@@ -18,6 +18,8 @@ ilow=0.03
 ihigh=0.3
 cutoff=1
 mkdir -p ${output_dir}
+cp ${sm_fn} ${output_dir}
+sm_fn=${output_dir}quant_bias_corrected.sf
 #===========================================
 # RNA-seq generation
 # Step 1: append abdance to reference fasta
