@@ -190,6 +190,7 @@ do
 	    ;;
 	*)
             # unknown option
+	    echo "unrecognized option $key!"
 	    ;;
     esac
 done
