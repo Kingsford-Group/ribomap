@@ -22,16 +22,14 @@ export PATH=${bin_dir}:$PATH
 export LD_LIBRARY_PATH=${lib_dir}:$LD_LIBRARY_PATH
 export DYLD_LIBRARY_PATH=${lib_dir}:$DYLD_LIBRARY_PATH
 work_dir=${src_dir}/../
+# star index
+star_idx_dir=${work_dir}StarIndex/
 # star outputs
 tmp_dir=${work_dir}alignment/
 # salmon
 sm_odir=${work_dir}sm_quant
 # ribomap
 output_dir=${work_dir}outputs
-star_idx_dir=${work_dir}StarIndex/
-# star index
-rrna_idx=${star_idx_dir}contaminant/
-transcript_idx=${star_idx_dir}transcript/
 #=============================
 # functions
 #=============================
@@ -122,6 +120,8 @@ do
 	    ;;
 	--work_dir)
 	    work_dir="$1"
+	    # star index
+	    star_idx_dir=${work_dir}StarIndex/
 	    # star outputs
 	    tmp_dir=${work_dir}alignment/
 	    # salmon
@@ -160,8 +160,6 @@ do
 	    ;;
 	--star_idx_dir)
 	    star_idx_dir="$1"
-	    rrna_idx=${star_idx_dir}contaminant/
-	    transcript_idx=${star_idx_dir}transcript/
 	    shift
 	    ;;
 	--alignment_dir)
@@ -231,6 +229,7 @@ ribo_core=${ribo_core%%.*}
 #============================================
 # step 1: filter rrna
 #============================================
+rrna_idx=${star_idx_dir}contaminant/
 ornaprefix=${tmp_dir}${rna_core}_rrna_
 oriboprefix=${tmp_dir}${ribo_core}_rrna_
 rna_nrrna_fa=${ornaprefix}Unmapped.out.mate1
@@ -254,6 +253,7 @@ fi
 #============================================
 # step 2: map to transcriptome
 #============================================
+transcript_idx=${star_idx_dir}transcript/
 ornaprefix=${tmp_dir}${rna_core}_transcript_
 oriboprefix=${tmp_dir}${ribo_core}_transcript_
 rna_bam=${ornaprefix}Aligned.out.bam
