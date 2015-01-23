@@ -22,7 +22,6 @@ footprint_generator: footprint_generator.o reference_info_builder.o ribomap_prof
 	$(COMPILE.c) $(OUTPUT_OPTION) $^ $(LDFLAGS)
 	chmod u+x $@
 
-
 ref_checker: reference_info_builder.o utils.o
 	$(COMPILE.c) $(OUTPUT_OPTION) $^ $(LDFLAGS)
 	chmod u+x $@

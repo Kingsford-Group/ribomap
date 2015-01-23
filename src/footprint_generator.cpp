@@ -16,8 +16,8 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-  if (argc != 13) {
-    cout<< "Usage: ./footprint_generator transcript_fa cds_range sailfish_result erate_fn ilow ihigh read_cnt read_len offset log_fname fq_fname nproc"<<endl;
+  if (argc != 14) {
+    cout<< "Usage: ./footprint_generator transcript_fa cds_range sailfish_result erate_fn ilow ihigh read_cnt read_len offset log_fname fq_fname nproc cutoff"<<endl;
     exit(1);
   }
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
   char* erate_fn=argv[4];
   char* log_fn=argv[10];
   char* fq_fn=argv[11];
-  double ilow(std::stof(argv[5])), ihigh(std::stof(argv[6]));
+  double ilow(std::stof(argv[5])), ihigh(std::stof(argv[6])), cutoff(std::stof(argv[13]));
   int read_len(std::stoi(argv[8])), offset(std::stoi(argv[9])), nproc(std::stoi(argv[12]));
   uint_fast64_t read_count(std::stoi(argv[7]));
   //cds range
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
   transcript_info tinfo(ref_fa, cds_range);
   //profile
   cout<<"constructing profile class...\n";
-  ribo_profile rprofile(tinfo, sf_fn, "sailfish", 1);
+  ribo_profile rprofile(tinfo, sf_fn, "sailfish", cutoff);
   cout<<"number of transcripts in profile class: "<<rprofile.number_of_transcripts()<<endl;
   //model
   cout<<"initializing tasep model parameters..."<<endl;
@@ -98,6 +98,7 @@ int main(int argc, char** argv)
     vector<uint_fast64_t> profile_count(p.size(),0);
     for (size_t i=0; i!=p.size(); ++i)
       profile_count[i] = round(p[i]* tot_count);
+    if (accumulate(profile_count.begin(), profile_count.end(), double(0))==0) continue;
     // step 3: profile write to log
     logfile<<"refID: "<<refID<<endl;
     logfile<<"tid: "<<tinfo.get_tid(refID)<<endl;
