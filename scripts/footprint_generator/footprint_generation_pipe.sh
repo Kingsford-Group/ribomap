@@ -4,7 +4,7 @@ sm_fn=/home/hw1/scratch/scratch2/ribomap-playground/hela/sm_quant/quant_bias_cor
 ref_old="${work_dir}"ref/gencode.v18.pc_transcripts_filter.fa
 cds_range="${work_dir}"ref/gencode.v18.pc_transcripts_cds.txt
 rlsim_exe=/home/hw1/code_store/rlsim/rlsim
-output_dir="${work_dir}"synthetic_data/
+output_dir="${work_dir}"synthetic_data_20m/
 ref_to_rlsim="${output_dir}"ref_with_abd.fa
 frags_from_rlsim="${output_dir}"synth_rnaseq_frags.fa
 reads_from_rlsim="${output_dir}"synth_rnaseq.fq
@@ -16,11 +16,10 @@ footprint_generator=./footprint_generator
 erate_fn=elongation_rate_human.txt
 ilow=0.03
 ihigh=0.3
+cutoff=1
 mkdir -p ${output_dir}
 #===========================================
 # RNA-seq generation
-#===========================================
-#===========================================
 # Step 1: append abdance to reference fasta
 #===========================================
 echo "preparing reference fasta for rlsim..."
@@ -37,12 +36,10 @@ echo "trimming fragments to generate single-end rnaseq reads..."
 python read_trimmer.py ${frags_from_rlsim} ${reads_from_rlsim} ${read_len}
 #===========================================
 # Ribo-seq generation
-#===========================================
-#===========================================
 # Step 1: generate footprint reads
 #===========================================
 echo "generating riboseq reads..."
-${footprint_generator} ${ref_old} ${cds_range} ${sm_fn} ${erate_fn} ${ilow} ${ihigh} ${read_cnt} ${read_len} ${offset} ${output_dir}synth_riboseq.profile ${output_dir}synth_riboseq.fq ${nproc}
+${footprint_generator} ${ref_old} ${cds_range} ${sm_fn} ${erate_fn} ${ilow} ${ihigh} ${read_cnt} ${read_len} ${offset} ${output_dir}synth_riboseq.profile ${output_dir}synth_riboseq.fq ${nproc} ${cutoff}
 #===========================================
 # Step 2: add errors to reads
 #===========================================
