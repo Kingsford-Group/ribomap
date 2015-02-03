@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import re
 from Bio import SeqIO
 from translation import *
 
@@ -97,10 +98,10 @@ def compare_gencode_pseq(pconvert, pseq):
             cset.add((pconvert[i], pseq[i]))
     return cset
 
-def find_tid_in_pheader(s):
+def find_tid_in_pheader(s, prefix=("ENST", "ENSMUST")):
     words = s.split('|')
     for w in words:
-        if w.startswith('ENST'):
+        if w.startswith(prefix):
             return w
     return ''
 
