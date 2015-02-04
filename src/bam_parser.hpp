@@ -26,6 +26,7 @@ struct fp_record{
   int count;
   vector<position> al_loci;
   set<string> seqs;
+  bool used;
 };
 
 // typedefs

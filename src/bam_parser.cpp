@@ -37,7 +37,7 @@ void alignment_regions_to_codon_ranges(const rd_rec_map_t& fp_rec, const transcr
 	codon_list.push_back(cp);
     }
     if (codon_list.size()!=0)
-      fp_codon_list.emplace_back(fp_record{fp.second.count, codon_list, fp.second.seqs});
+      fp_codon_list.emplace_back(fp_record{fp.second.count, codon_list, fp.second.seqs, fp.second.used});
   }
   // sanity check whether fp_rec is the same as bam summary
   double total=0, multi_mapped=0;
@@ -65,7 +65,7 @@ void assign_P_site(const rd_rec_map_t& fp_rec_in, const transcript_info& tinfo, 
 	read_type_of_psite(ibp, cds_begin, cds_end, offset, obp);
       obp_list.push_back(obp);
     }
-    fp_rec_out.emplace_back(fp_record{ifp.second.count, obp_list, ifp.second.seqs});
+    fp_rec_out.emplace_back(fp_record{ifp.second.count, obp_list, ifp.second.seqs, ifp.second.used});
   }
   // sanity check whether fp_rec is the same as bam summary
   double total=0, multi_mapped=0;
@@ -92,7 +92,7 @@ void assign_P_site(const rd_rec_map_t& fp_rec_in, const transcript_info& tinfo, 
       read_type_of_psite(ibp, cds_begin, cds_end, it->second, obp);
       obp_list.push_back(obp);
     }
-    fp_rec_out.emplace_back(fp_record{ifp.second.count, obp_list, ifp.second.seqs});
+    fp_rec_out.emplace_back(fp_record{ifp.second.count, obp_list, ifp.second.seqs, ifp.second.used});
   }
   // sanity check whether fp_rec is the same as bam summary
   double total=0, multi_mapped=0;
@@ -338,7 +338,7 @@ bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, con
       auto it = rd_rec.find(name);
       if (it == rd_rec.end()) {
 	int count(get_count_from_fasta_header(name, cnt_sep));
-	rd_rec.emplace(name,fp_record{count, vector<position>{p}, set<string>{seq}});
+	rd_rec.emplace(name,fp_record{count, vector<position>{p}, set<string>{seq}, false});
 	//cout<<name<<" "<<count<<endl;
       }
       else {
