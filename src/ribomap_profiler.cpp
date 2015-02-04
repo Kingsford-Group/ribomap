@@ -214,7 +214,7 @@ bool ribo_profile::assign_reads(fp_list_t& fp_base_list, const unordered_set<int
       add_tot_count(t, count);
     }
   }// for r: fp_base_list
-  return false;
+  return check_tot_count(fp_base_list);
 }
 
 // bool ribo_profile::initialize_read_count(const fp_list_t&  fp_codon_list, bool normalize)

@@ -130,12 +130,10 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
     expressed_read_bases_from_bam(fp_rec, ribo_bam, tinfo, rprofile, "-", lmin, lmax, useSecondary, offset.c_str());
   }
   cout<<"assigning reads to frame0 loci..."<<endl;
-  rprofile.assign_reads(fp_rec, unordered_set<int>{FRAME0});
-  if (not rprofile.check_tot_count(fp_rec))
+  if (not rprofile.assign_reads(fp_rec, unordered_set<int>{FRAME0}))
     cout<<"total input count not matching total assigning count!"<<endl;
   cout<<"assigning reads to non-frame0 loci..."<<endl;
-  rprofile.assign_reads(fp_rec, unordered_set<int>{UTR5, FRAME1, FRAME2, UTR3});
-  if (not rprofile.check_tot_count(fp_rec))
+  if (not rprofile.assign_reads(fp_rec, unordered_set<int>{UTR5, FRAME1, FRAME2, UTR3}))
     cout<<"total input count not matching total assigning count!"<<endl;
   cout<<"assigning RNA-seq reads..."<<endl;
   ribo_profile mprofile(tinfo, tabd_fname, tabd_type, tabd_cutoff);
@@ -144,8 +142,7 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
   fp_rec.clear();
   expressed_read_bases_from_bam(fp_rec, mRNA_bam, tinfo, mprofile, "-", lmin, MAX_READ_LEN, true, -1);
   cout<<"assigning reads..."<<endl;
-  mprofile.assign_reads(fp_rec,unordered_set<int>{UTR5, FRAME0, FRAME1, FRAME2, UTR3});
-  if (not rprofile.check_tot_count(fp_rec))
+  if (not mprofile.assign_reads(fp_rec,unordered_set<int>{UTR5, FRAME0, FRAME1, FRAME2, UTR3}))
     cout<<"total input count not matching total assigning count!"<<endl;
   cout<<"rank transcripts..."<<endl;
   abundance_rank rank(rprofile, tinfo);
