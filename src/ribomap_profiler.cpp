@@ -187,30 +187,32 @@ bool ribo_profile::assign_reads(fp_list_t& fp_base_list, const unordered_set<int
       if (type_set.find(loc.type)!=type_set.end())
 	loci.emplace_back(loc);
     } // for r.al_loci
+    // no mappings of the desired type, move on to the next read
+    if (loci.size() == 0) continue;
+    // read processed mark as used
+    r.used = true;
     // round 2: get transcript abundance
-    vector<double> prob(loci.size(), 1);
-    double tot_prob(1);
-    if (prob.size() > 1) {
-      tot_prob = 0;
-      for (size_t i=0; i!=prob.size(); ++i) {
-	const position& loc(loci[i]);
-	rid_t refID(loc.refID);
-	rid_t t(get_transcript_index(refID));
-	prob[i] = get_tot_abundance(t);
-	tot_prob += prob[i];
-      }
+    vector<double> prob(loci.size(), 0);
+    double tot_prob(0);
+    for (size_t i=0; i!=prob.size(); ++i) {
+      const position& loc(loci[i]);
+      rid_t refID(loc.refID);
+      rid_t t(get_transcript_index(refID));
+      prob[i] = get_tot_abundance(t);
+      tot_prob += prob[i];
     }
     // round 3: asign reads to loci proportional to loci prob
     for (size_t i=0; i!=prob.size(); ++i) {
       const position& loc(loci[i]);
       rid_t refID(loc.refID);
       rid_t t(get_transcript_index(refID));
-      double count = r.count * prob[i] / tot_prob;
+      double count(r.count);
+      if (prob.size()!=1)
+	count *= prob[i] / tot_prob;
       for (rid_t base = loc.start; base != loc.stop; ++base) 
 	add_read_count(t,base, count);
       add_tot_count(t, count);
     }
-    r.used = true;
   }// for r: fp_base_list
   return false;
 }
@@ -316,7 +318,7 @@ void ribo_profile::reset_read_count()
 
 bool ribo_profile::check_tot_count(const fp_list_t& fp_base_list) const
 {
-  int tot_in = 0, tot_out = 0;
+  double tot_in = 0, tot_out = 0;
   for (auto r: fp_base_list) {
     if (r.used)
       tot_in += r.count;
@@ -324,5 +326,5 @@ bool ribo_profile::check_tot_count(const fp_list_t& fp_base_list) const
   for (size_t t=0; t!= number_of_transcripts(); ++t)
     tot_out += get_tot_count(t);
   cout<<"reads used: "<<tot_in<<" reads assigned: "<<tot_out<<endl;
-  return (tot_in==tot_out);
+  return (std::fabs(tot_in-tot_out)>1e-10);
 }
