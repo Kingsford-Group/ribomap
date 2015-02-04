@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -O3 -Wno-deprecated-declarations -DSEQAN_HAS_ZLIB=1 -DSEQAN_HAS_BZIP2=1 # -fopenmp
-#INC = -I/home/hw1/.local/include/ -I/opt/local/include
+INC = -I/home/hw1/.local/include/ -I/opt/local/include
 #LIB = -L/opt/local/lib -lboost_system -lboost_filesystem
 CXXFLAGS += $(INC)
 COMPILE.c = $(CXX) $(CXXFLAGS)
