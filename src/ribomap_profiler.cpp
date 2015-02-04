@@ -170,10 +170,11 @@ void ribo_profile::express_parser(const transcript_info& tinfo, const char* ep_f
     profile[t].tot_abundance /= total_abundance;
 }
 
-bool ribo_profile::assign_reads(const fp_list_t& fp_base_list, const unordered_set<int>& type_set)
+bool ribo_profile::assign_reads(fp_list_t& fp_base_list, const unordered_set<int>& type_set)
 {
-  for (auto r: fp_base_list) {
+  for (auto& r: fp_base_list) {
     // round 1: get candidate alignment loci
+    if (r.used) continue;
     vector<position> loci;
     for (auto loc: r.al_loci) {
       rid_t refID(loc.refID); //transcript index
@@ -209,35 +210,36 @@ bool ribo_profile::assign_reads(const fp_list_t& fp_base_list, const unordered_s
 	add_read_count(t,base, count);
       add_tot_count(t, count);
     }
+    r.used = true;
   }// for r: fp_base_list
   return false;
 }
 
-bool ribo_profile::initialize_read_count(const fp_list_t&  fp_codon_list, bool normalize)
-{
-  for (auto r: fp_codon_list) {
-    vector<read_loc_count> loc_count_list;
-    double tot_count(r.count);
-    for (auto pos: r.al_loci) {
-      rid_t refID(pos.refID); //transcript index
-      rid_t t(get_transcript_index(refID));
-      int start(pos.start), stop(pos.stop);
-      if (start<0 or stop>len(t)) {
-	cout<<"profile index out of bound! readID:"<<*r.seqs.begin()<<" ";
-	cout<<r.al_loci.size()<<" "<<refID<<" "<<start<<"-"<<stop<<" "<<len(t)<<endl;
-	continue;
-      }
-      for (rid_t i=start; i!=stop; ++i)
-	loc_count_list.emplace_back(read_loc_count{t,i,tot_count});
-    }// for codon range list
-    read_count_list.emplace_back(read_count{tot_count,loc_count_list});
-    total_read_count += tot_count;
-  }// for r
-  if (normalize)
-    for (auto& r: read_count_list)
-      r.tot_count /= total_read_count;
-  return false;
-}
+// bool ribo_profile::initialize_read_count(const fp_list_t&  fp_codon_list, bool normalize)
+// {
+//   for (auto r: fp_codon_list) {
+//     vector<read_loc_count> loc_count_list;
+//     double tot_count(r.count);
+//     for (auto pos: r.al_loci) {
+//       rid_t refID(pos.refID); //transcript index
+//       rid_t t(get_transcript_index(refID));
+//       int start(pos.start), stop(pos.stop);
+//       if (start<0 or stop>len(t)) {
+// 	cout<<"profile index out of bound! readID:"<<*r.seqs.begin()<<" ";
+// 	cout<<r.al_loci.size()<<" "<<refID<<" "<<start<<"-"<<stop<<" "<<len(t)<<endl;
+// 	continue;
+//       }
+//       for (rid_t i=start; i!=stop; ++i)
+// 	loc_count_list.emplace_back(read_loc_count{t,i,tot_count});
+//     }// for codon range list
+//     read_count_list.emplace_back(read_count{tot_count,loc_count_list});
+//     total_read_count += tot_count;
+//   }// for r
+//   if (normalize)
+//     for (auto& r: read_count_list)
+//       r.tot_count /= total_read_count;
+//   return false;
+// }
 
 vector<rid_t> ribo_profile::get_expressed_transcript_ids() const
 {
@@ -247,51 +249,51 @@ vector<rid_t> ribo_profile::get_expressed_transcript_ids() const
   return refID_vec;
 }
 
-// bowtie-best: reads only map to one place, no need to build read_count_list
-bool ribo_profile::single_map_read_count(const fp_list_t& fp_codon_list)
-{
-  for (auto r: fp_codon_list) {
-    auto& pos(r.al_loci[0]);
-    rid_t refID(pos.refID); //transcript index in ribo_profile.profile
-    rid_t t(get_transcript_index(refID));
-    // sanity check for transcript index
-    if (t>number_of_transcripts()-1){
-      cout<<"transcript index out of bound! readID:"<<*r.seqs.begin()<<" ";
-      cout<<t<<" "<<number_of_transcripts()<<endl;
-    }
-    int start(pos.start), stop(pos.stop);
-    // sanity check for profile index
-    if (start<0 or stop>len(t)) {
-      cout<<"profile index out of bound! readID:"<<*r.seqs.begin()<<" ";
-      cout<<r.al_loci.size()<<" "<<refID<<" "<<start<<"-"<<stop<<" "<<len(t)<<endl;
-    }
-    for (rid_t i=start; i!=stop; ++i){
-      add_read_count(t,i,r.count);
-      add_tot_count(t,r.count);
-    }
-  }// for r
-  return false;
-}
+// // bowtie-best: reads only map to one place, no need to build read_count_list
+// bool ribo_profile::single_map_read_count(const fp_list_t& fp_codon_list)
+// {
+//   for (auto r: fp_codon_list) {
+//     auto& pos(r.al_loci[0]);
+//     rid_t refID(pos.refID); //transcript index in ribo_profile.profile
+//     rid_t t(get_transcript_index(refID));
+//     // sanity check for transcript index
+//     if (t>number_of_transcripts()-1){
+//       cout<<"transcript index out of bound! readID:"<<*r.seqs.begin()<<" ";
+//       cout<<t<<" "<<number_of_transcripts()<<endl;
+//     }
+//     int start(pos.start), stop(pos.stop);
+//     // sanity check for profile index
+//     if (start<0 or stop>len(t)) {
+//       cout<<"profile index out of bound! readID:"<<*r.seqs.begin()<<" ";
+//       cout<<r.al_loci.size()<<" "<<refID<<" "<<start<<"-"<<stop<<" "<<len(t)<<endl;
+//     }
+//     for (rid_t i=start; i!=stop; ++i){
+//       add_read_count(t,i,r.count);
+//       add_tot_count(t,r.count);
+//     }
+//   }// for r
+//   return false;
+// }
 
-// assign reads based on transcript abundance only 
-bool ribo_profile::assign_reads()
-{
-  for (auto& r: read_count_list) {
-    double current_read_abd(0);
-    // round 1: get expected values
-    // numerators stored in read_local_count.count
-    // denominators stored in current_read_abd
-    for (auto& p: r.loc_count_list) {
-      p.count = get_tot_abundance(p.tid);
-      current_read_abd += p.count;
-    }//round 1
-    if (current_read_abd == 0) continue;
-    // round 2: update counts
-    for (auto& p: r.loc_count_list)
-      p.count *= r.tot_count/current_read_abd;
-  }// for r
-  return false;
-}
+// // assign reads based on transcript abundance only 
+// bool ribo_profile::assign_reads()
+// {
+//   for (auto& r: read_count_list) {
+//     double current_read_abd(0);
+//     // round 1: get expected values
+//     // numerators stored in read_local_count.count
+//     // denominators stored in current_read_abd
+//     for (auto& p: r.loc_count_list) {
+//       p.count = get_tot_abundance(p.tid);
+//       current_read_abd += p.count;
+//     }//round 1
+//     if (current_read_abd == 0) continue;
+//     // round 2: update counts
+//     for (auto& p: r.loc_count_list)
+//       p.count *= r.tot_count/current_read_abd;
+//   }// for r
+//   return false;
+// }
 
 void ribo_profile::reset_read_count()
 {
@@ -301,13 +303,26 @@ void ribo_profile::reset_read_count()
   }
 }
 
-void ribo_profile::update_count_profile()
+// void ribo_profile::update_count_profile()
+// {
+//   reset_read_count();
+//   for (auto r: read_count_list) {
+//     for (auto p: r.loc_count_list) {
+//       add_read_count(p.tid,p.loc,p.count);
+//       add_tot_count(p.tid,p.count);
+//     }
+//   }
+// }
+
+bool ribo_profile::check_tot_count(const fp_list_t& fp_base_list) const
 {
-  reset_read_count();
-  for (auto r: read_count_list) {
-    for (auto p: r.loc_count_list) {
-      add_read_count(p.tid,p.loc,p.count);
-      add_tot_count(p.tid,p.count);
-    }
+  int tot_in = 0, tot_out = 0;
+  for (auto r: fp_base_list) {
+    if (r.used)
+      tot_in += r.count;
   }
+  for (size_t t=0; t!= number_of_transcripts(); ++t)
+    tot_out += get_tot_count(t);
+  cout<<"reads used: "<<tot_in<<" reads assigned: "<<tot_out<<endl;
+  return (tot_in==tot_out);
 }

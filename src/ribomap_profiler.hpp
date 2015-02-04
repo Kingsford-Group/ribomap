@@ -27,18 +27,18 @@ struct tprofile{
   double tot_abundance;
 };
 
-// SHOULD GET RID OF
-//------expected count info per read per transcript-location pair------//
-struct read_loc_count {
-  rid_t tid;
-  rid_t loc;
-  double count;
-};
-//------count info per read------//
-struct read_count { 
-  double tot_count;
-  vector<read_loc_count> loc_count_list;
-};
+// // SHOULD GET RID OF
+// //------expected count info per read per transcript-location pair------//
+// struct read_loc_count {
+//   rid_t tid;
+//   rid_t loc;
+//   double count;
+// };
+// //------count info per read------//
+// struct read_count { 
+//   double tot_count;
+//   vector<read_loc_count> loc_count_list;
+// };
 
 /***
  * class ribo_profile:
@@ -46,10 +46,10 @@ struct read_count {
  */
 class ribo_profile{
 public:
-  vector<read_count> read_count_list; 
+  // vector<read_count> read_count_list; 
   unordered_map<rid_t, rid_t> refID2pID; //ref index from fasta --> profile index
   ribo_profile(const transcript_info& tinfo, const char* fname, const string& filetype, double abundance_cutoff = 1);
-  bool assign_reads(const fp_list_t& fp_base_list, const unordered_set<int>& type);
+  bool assign_reads(fp_list_t& fp_base_list, const unordered_set<int>& type);
   vector<rid_t> get_expressed_transcript_ids() const;
   bool is_expressed(rid_t refID) const { return nonzero_abundance_vec[refID]; }
   const vector<double>& get_read_assignments(rid_t t) const { return profile[t].count;}
@@ -59,11 +59,12 @@ public:
   rid_t get_transcript_index(rid_t refID) const { return refID2pID.at(refID); }
   size_t len(rid_t t) const { return profile[t].count.size(); }
   size_t number_of_transcripts() const { return profile.size(); }
-  // Need to get rid of
-  bool initialize_read_count(const fp_list_t& fp_codon_list, bool normalize = true);
-  bool assign_reads();
-  void update_count_profile();
-  bool single_map_read_count(const fp_list_t& fp_codon_list);
+  bool check_tot_count(const fp_list_t& fp_base_list) const;
+  // // Need to get rid of
+  // bool initialize_read_count(const fp_list_t& fp_codon_list, bool normalize = true);
+  // bool assign_reads();
+  // void update_count_profile();
+  // bool single_map_read_count(const fp_list_t& fp_codon_list);
 private:
   vector<tprofile> profile;
   // bit vector: 1--transcript has non-zero abundance; 0--zero abundance
