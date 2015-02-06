@@ -290,6 +290,10 @@ bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, con
     // get mapped reads
      if (!hasFlagUnmapped(bam_rec)){
        if (not useSecondary and hasFlagSecondary(bam_rec)) continue;
+       // the reverse complement of a read map to the transcriptome
+       // however ribo-seq is stranded, such case is therefore impossible
+       // therefore such alignments should be discarded
+       if (hasFlagRC(bam_rec)) continue;
       // get alignment information
       unsigned refID = bam_rec.rID;
       if ( not profiler.is_expressed(refID)) continue;
