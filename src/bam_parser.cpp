@@ -212,35 +212,35 @@ read_t base_range_to_middle_codon(const position& bp, int cds_begin, int cds_end
   }
 }
 
-bool expressed_read_codon_ranges_from_bam(fp_list_t& fp_codon_list, const char *fn, const transcript_info& tinfo, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax, bool useSecondary, int offset)
+bool expressed_read_codon_ranges_from_bam(fp_list_t& fp_codon_list, const char *fn, const transcript_info& tinfo, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax, bool useSecondary, bool useRC, int offset)
 {
   cout<<"getting alignment records..."<<endl;
   rd_rec_map_t rd_rec;
-  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep, lmin, lmax, useSecondary);
+  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep, lmin, lmax, useSecondary, useRC);
   cout<<"total number of reads: "<<rd_rec.size()<<endl;
   cout<<"convert read loci to codon ranges...\n";
   alignment_regions_to_codon_ranges(rd_rec, tinfo, fp_codon_list, offset);
   return false;
 }
 
-bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax, bool useSecondary, int offset)
+bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax, bool useSecondary, bool useRC, int offset)
 {
   cout<<"getting alignment records..."<<endl;
   rd_rec_map_t rd_rec;
-  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep, lmin, lmax, useSecondary);
+  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep, lmin, lmax, useSecondary, useRC);
   cout<<"total number of reads: "<<rd_rec.size()<<endl;
   cout<<"getting read type and p-sites...\n";
   assign_P_site(rd_rec, tinfo, fp_rec_out, offset);
   return false;
 }
 
-bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax, bool useSecondary, const char* offset_fn)
+bool expressed_read_bases_from_bam(fp_list_t& fp_rec_out, const char* fn, const transcript_info& tinfo, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax, bool useSecondary, bool useRC, const char* offset_fn)
 {
   cout<<"getting readlen mapping to P site offset..."<<endl;
   rlen2psite_t rl2p = get_readlen_psite_map(offset_fn);
   cout<<"getting alignment records..."<<endl;
   rd_rec_map_t rd_rec;
-  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep, lmin, lmax, useSecondary);
+  get_expressed_alignments_from_bam(rd_rec, fn, profiler, cnt_sep, lmin, lmax, useSecondary, useRC);
   cout<<"total number of reads: "<<rd_rec.size()<<endl;
   cout<<"getting read type and p-sites...\n";
   assign_P_site(rd_rec, tinfo, fp_rec_out, rl2p);
@@ -273,7 +273,7 @@ int get_count_from_fasta_header(const string header, const string& sep="_")
   return count;
 }
 
-bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax, bool useSecondary)
+bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, const ribo_profile& profiler, const string& cnt_sep, int lmin, int lmax, bool useSecondary, bool useRC)
 {
   // open bam file
   seqan::BamStream bamIn(fn);
@@ -293,7 +293,7 @@ bool get_expressed_alignments_from_bam(rd_rec_map_t& rd_rec, const char *fn, con
        // the reverse complement of a read map to the transcriptome
        // however ribo-seq is stranded, such case is therefore impossible
        // therefore such alignments should be discarded
-       if (hasFlagRC(bam_rec)) continue;
+       if (hasFlagRC(bam_rec) and not useRC) continue;
       // get alignment information
       unsigned refID = bam_rec.rID;
       if ( not profiler.is_expressed(refID)) continue;
