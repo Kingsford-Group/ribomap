@@ -92,15 +92,20 @@ Under the `bin` directory, run:
 
 The list of options are as follows:
 
-* __-r | --ribobam__ Bam file of ribo-seq read mappings to the transcriptome
-* __-m | --mrnabam__ Bam file of RNA-seq read mappings to the transcriptome
-* __-f | --fasta__ Transcriptome reference fasta file
-* __-cds | --cds_range__ CDS range file
-* __-s | --sf__ Transcript abundance estimation produced by Sailfish
-* __-c | --cl__ Transcript abundance estimation produced by Cufflinks
-* __-e | --ep__ Transcript abundance estimation produced by eXpress
-* __-o | --out__ Output file prefix of Ribomap's result
-* __-p | --offset__ Offset location in a read that the ribosome P-site maps to, or the name of a offset file that specifies P-site offset for different read length
+* __-r | --ribobam__ Bam file of ribo-seq read mappings to the transcriptome.
+* __-m | --mrnabam__ Bam file of RNA-seq read mappings to the transcriptome.
+* __-f | --fasta__ Transcriptome reference fasta file.
+* __-cds | --cds_range__ CDS range file.
+* __-s | --sf__ Transcript abundance estimation produced by Sailfish.
+* __-c | --cl__ Transcript abundance estimation produced by Cufflinks.
+* __-e | --ep__ Transcript abundance estimation produced by eXpress.
+* __threshold | --tabd_cutoff__ Transcript abundance threshold to be considered expressed.
+* __-o | --out__ Output file prefix of Ribomap's result.
+* __-p | --offset__ Offset location in a read that the ribosome P-site maps to, or the name of a offset file that specifies P-site offset for different read length.
+* __-lmin | --min_fplen__ Minimun read length to keep for downstream analysis.
+* __-lmax | --max_fplen__ Maximum riboseq read length to keep for downstream analysis.
+* __-sec | --useSecondary__ Use multi-mapping alignments when assigning footprints to candidate loci.
+* __-rc | --useRC__ Use alignments with the RC flag set in the RNA-seq data.
 
 One example of using the executable:
 ~~~~~~
