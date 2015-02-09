@@ -112,9 +112,10 @@ One example of using the executable:
     ./riboprof  \
     --mrnabam mRNA.bam --ribobam ribo.bam \
     --fasta transcript.fa --cds_range cds_range.txt \
-    --sf quant.sf \
-    --offset 12 \
-    --out ../outputs/ribomap\n
+    --sf quant.sf  --tabd_cutoff 0 \
+    --offset 12  --min_fplen 27 --max_fplen 33 \
+    --out ../outputs/ribomap \
+    --useSecondary
 ~~~~~~
 Please connect the parameter flags and the parameters with a space.
 
