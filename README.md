@@ -35,6 +35,7 @@ Run Ribomap
 Under the `scripts` directory, run:
 
       ./run_ribomap.sh [options]
+
 The list of options are as follows:
 * __--rnaseq_fq__ (required) Input RNA-seq read fastq.gz file for transcript abundance estimation.
 * __--riboseq_fq__ (required) Input ribosome profiling (riboseq) read fastq.gz file.
@@ -57,6 +58,7 @@ The list of options are as follows:
 * __--sailfish_dir__ (default `$work_dir/sm_quant/`) Directory to store sailfish result.
 * __--output_dir__ (default `$work_dir/outputs/`) Directory to store ribomap's outputs.
 * __--force__ Force ribomap to regenerate all intermediate steps.
+
 One example of using the shell script:
 ~~~~~~
     ./run_ribomap.sh \
@@ -66,6 +68,7 @@ One example of using the shell script:
     --transcript_fa transcript.fa \
     --cds_range cds_range.txt
 ~~~~~~
+
 Please connect the parameter flags and the parameters with a white space.
 
 * __CDS range file__ A plain text file that includes the CDS regions of transcriptome. Each line in the file should be in the following format:
