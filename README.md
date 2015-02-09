@@ -122,8 +122,8 @@ Please connect the parameter flags and the parameters with a space.
 Ribomap output files
 ------
 Ribomap produces five output files:
-#### _XXX.codon_
-The ribosome profiles within the CDS of reach transcript. Each entry of a specific transcript looks like this:
+#### _XXX.base_
+The sub-codon resolution, nucleotide-level ribosome profiles including the UTR regions. Only transcripts with a non-zero total ribosome count are reported. Each entry of a specific transcript looks like this:
 ~~~~~~
 	refID: 0
 	tid: YAL001C
@@ -132,13 +132,13 @@ The ribosome profiles within the CDS of reach transcript. Each entry of a specif
 	normalized ribo profile: 0 0 0 1.0137 0.781609 0.0208333 0.125 ...
 ~~~~~~  
 * __refID__ The transcript fai index in the transcriptome fasta file.
-* __tid__ Transcript ensemble ID.
-* __ribo profile__ Ribosome profile vector of the CDS regions of the transcript. Each number in the vector is the number of ribosome footprints that are estimated to be from the corresponding codon location.
-* __mRNA profile__ RNA-seq profile vector of the CDS regions of the transcript. Each number in the vector is the read coverage count that are esimated on the corresponding codon location.
-* __normalized ribo profile__ Ribosome profile vector of the CDS regions of the transcript after bias correction. Each number in the vetor is the ratio between the ribo profile count and the mRNA profile count
+* __tid__ Transcript header name in the transcriptome fasta file.
+* __ribo profile__ Nucleotide level ribosome profile including the UTR regions. Each number in the vector is the number of ribosome footprints whose P-sites are covering the corresponding base.
+* __mRNA profile__ RNA-seq profile vector of the transcript. Each number in the vector is the read coverage count that are esimated on the corresponding base.
+* __normalized ribo profile__ The ribosome profile vector after bias correction. Each number in the vetor is the ratio between the ribo profile count and the mRNA profile count.
 
-#### _XXX.base_
-The nucleotide-level ribosome profiles including the UTR regions. The file format is exactly the same as the the _XXX.codon_ file.
+#### _XXX.codon_
+The in-frame ribosome profiles within the CDS of each transcript.The file format is the same as the the _XXX.base_ file.
 
 #### _XXX.stats_
 The summarized statistics for each transcripts. Each entro of a specific transcript looks like this: 
@@ -150,7 +150,7 @@ The summarized statistics for each transcripts. Each entro of a specific transcr
 	te: 1.89078e+07
 ~~~~~~
 * __refID__ The transcript fai index in the transcriptome fasta file.
-* __tid__ Transcript ensemble ID.
+* __tid__ Transcript header name in the transcriptome fasta file.
 * __rabd__ Ribosome loads, which is the total number of ribosome reads that are esimated from this trascript.
 * __tabd__ Relative transcript abundance from Sailfish’s result.
 * __te__ Relative translational efficiency, which is the ratio between __rabd__ and __tabd__.
@@ -162,7 +162,7 @@ There is one transcript record per row. The columns are defined as follows:
 
 | Column number | Description |
 |---------------|-------------|
-| 1 | transcript Ensembl ID | 
+| 1 | transcript header name | 
 | 2 | relative transcript abundance |
 | 3 | total ribosome footprint count |
 | 4 | pencentile ranking of the transcript abundance |
