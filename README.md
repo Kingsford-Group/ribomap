@@ -51,7 +51,7 @@ The list of options are as follows:
 * __--offset__ (default 12) Offset location in a read that the ribosome P-site maps to, or a text file name that defines the P-site offset based on read length (see description below).
 * __--rnaUnstranded__ (default `false`) Whether the RNA-seq protocol is stranded. If the RNA-seq protocol is unstranded, the `librarytype` to run Salifish is set to `-l U`; otherwise the `librarytype` is set to `-l SF`, and alignments with the RC flag set in the RNA-seq data are discarded.
 * __--tabd_cutoff__ (default 0) Transcript abundance threshold to be considered expressed.
-*__--useSecondary__ (default `true`) Whether multi-mapping alignments are used when assigning footprints to candidate loci.
+* __--useSecondary__ (default `true`) Whether multi-mapping alignments are used when assigning footprints to candidate loci.
 * __--star_idx_dir__ (default `$work_dir/StarIndex/`) Directory to store Star index.
 * __--alignment_dir__ (default  `$work_dir/alignment/`) Directory to store alignment results output by STAR.
 * __--sailfish_dir__ (default `$work_dir/sm_quant/`) Directory to store sailfish result.
