@@ -156,7 +156,6 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
   cout<<"rank transcripts..."<<endl;
   abundance_rank rank(rprofile, tinfo);
   cout<<"transcripts in rank list: "<<rank.size()<<endl;
-  int rank_size = std::max(int(rank.size()), 100);
   rank.get_rank(100);
   rank.write_diff_list(log_prefix, 10);
   return false;
