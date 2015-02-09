@@ -21,37 +21,42 @@ a c++ compiler that support c++11 features (for instance g++ >= 4.7) is required
 
     cd src
     make riboprof INC="-I/opt/local/include"
+    make install
 
-This will generate a c++ executable `riboprof` that assign ribosome profiling reads to transcript locations
+This will generate a c++ executable `riboprof` that assign ribosome profiling reads to transcript locations and copy the executable to the `bin` directory.
 
 Please add the path for the prerequistite headers with flag `INC="-I<path/to/include/>"`
 
 Run Ribomap
 ------
 #### Run Ribomap with automatic transcript abundance estimation
-`run_ribomap.sh` is a pipeline that takes in the riboseq data and the RNA-seq data and automatically estimates the transcript abundance, then assigns riboseq reads to transcript locations based on the estimated transcript abundance. 
+`run_ribomap.sh` is an automatic pipeline for ribosome profiling data. It takes in the riboseq data and the RNA-seq data and automatically estimates the transcript abundance, then assigns riboseq reads to transcript locations based on the estimated transcript abundance. 
 
 Under the `scripts` directory, run:
 
       ./run_ribomap.sh [options]
 The list of options are as follows:
-* __--rnaseq_fq__ (required) Input RNA-seq read fastq.gz file for transcript abundance estimation
-* __--riboseq_fq__ (required) Input ribosome profiling (riboseq) read fastq.gz file
-* __--transcript_fa__ (required) Input trascriptome reference fasta file
-* __--contaminant_fa__ Input contaminant sequence fasta file (human ribosome RNA sequences are included in directory `data`)
-* __--cds_range__ A text file that includes the coding sequence (CDS) range for all transcripts (see description below). If such an option is not provided, the transcript fasta file is assume to only include the CDS regions
-* __--work_dir__ (default the parent directory of `scripts`) The working directory where all intermediate and final results will write to
-* __--adapter__ (default `CTGTAGGCACCATCAAT`) The linker sequence attached to the 5' end of the ribo-seq reads
-* __--min_fplen__ (default 27) Minimun read length to keep for downstream analysis
-* __--max_fplen__ (default 33) Maximum riboseq read length to keep for downstream analysis
-* __--nproc__ (default 15) Number of threads can be used by ribomap
-* __--offset__ (default 12) Offset location in a read that the ribosome P-site maps to, or a text file name that defines the P-site offset based on read length (see description below)
-* __--fasta_dir__ (default `$work_dir/data/fasta/`) Directory to store the preproceccsed fastq file
-* __--star_idx_dir__ (default `$work_dir/StarIndex/`) Directory to store Star index
-* __--alignment_dir__ (default  `$work_dir/alignment/`) Directory to store alignment results output by STAR
-* __--sailfish_dir__ (default `$work_dir/sm_quant/`) Directory to store sailfish result
-* __--output_dir__ (default `$work_dir/outputs/`) Directory to store ribomap's outputs
-* __--force__ Force ribomap to regenerate all intermediate steps
+* __--rnaseq_fq__ (required) Input RNA-seq read fastq.gz file for transcript abundance estimation.
+* __--riboseq_fq__ (required) Input ribosome profiling (riboseq) read fastq.gz file.
+* __--transcript_fa__ (required) Input trascriptome reference fasta file.
+* __--contaminant_fa__ Input contaminant sequence fasta file (human ribosome RNA sequences are included in directory `data`).
+* __--cds_range__ A text file that includes the coding sequence (CDS) range for all transcripts (see description below). If such an option is not provided, the transcript fasta file is assume to only include the CDS regions.
+* __--work_dir__ (default the parent directory of `scripts`) The working directory where all intermediate and final results will write to.
+* __--nproc__ (default 15) Number of threads can be used by ribomap.
+* __--adapter__ (default `CTGTAGGCACCATCAAT`) The linker sequence attached to the 5' end of the ribo-seq reads.
+* __--nmismatch__ (default 1) Number of mismatches allowed in the read alignments.
+* __softClipping__ (default `true`) Whether reads are allowed to be soft-clipped by STAR when aligning to the transcriptome.
+* __--min_fplen__ (default 27) Minimun read length to keep for downstream analysis.
+* __--max_fplen__ (default 33) Maximum riboseq read length to keep for downstream analysis.
+* __--offset__ (default 12) Offset location in a read that the ribosome P-site maps to, or a text file name that defines the P-site offset based on read length (see description below).
+*__--rnaUnstranded__ (default `false`) Whether the RNA-seq protocol is stranded. If the RNA-seq protocol is unstranded, the `librarytype` to run Salifish is set to `-l U`; otherwise the `librarytype` is set to `-l SF`, and alignments with the RC flag set in the RNA-seq data are discarded.
+* __--tabd_cutoff__ (default 0) Transcript abundance threshold to be considered expressed..
+*__--useSecondary__ (default `true`) Whether multi-mapping alignments are used when assigning footprints to candidate loci.
+* __--star_idx_dir__ (default `$work_dir/StarIndex/`) Directory to store Star index.
+* __--alignment_dir__ (default  `$work_dir/alignment/`) Directory to store alignment results output by STAR.
+* __--sailfish_dir__ (default `$work_dir/sm_quant/`) Directory to store sailfish result.
+* __--output_dir__ (default `$work_dir/outputs/`) Directory to store ribomap's outputs.
+* __--force__ Force ribomap to regenerate all intermediate steps.
 One example of using the shell script:
 ~~~~~~
     ./run_ribomap.sh \
