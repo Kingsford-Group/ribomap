@@ -2,16 +2,19 @@
 #=============================
 # default parameters
 #=============================
+force=false
+nproc=15 # threads
+# STAR default params
 adapter=CTGTAGGCACCATCAAT
+nmismatch=1 
+softclip=true 
+# riboprof default parpams
+tabd_cutoff=0 # salmon abundance cutoff
+useSecondary=true # for riboseq multimapping in riboprof
+useRC=false # for rnaseq (salmon + riboprof)
 min_fplen=27
 max_fplen=33
-nproc=15 # threads
-nmismatch=1
 offset=12 # P-site offset
-force=false
-tabd_cutoff=0
-useSecondary=true
-softclip=true
 #=============================
 # pre-filled parameters
 #=============================
@@ -182,6 +185,10 @@ do
 	    useSecondary="$1"
 	    shift
 	    ;;
+	--rnaUnstranded)
+	    useRC=true
+	    shift
+	    ;;
 	--softClipping)
 	    softclip="$1"
 	    shift
@@ -272,9 +279,14 @@ align_reads ${ribo_nrrna_fa} ${oriboprefix} ${ribo_bam}
 # step 3: salmon expression quantification
 #============================================
 sm_out=${sm_odir}/quant_bias_corrected.sf
+if [ "${useRC}" = true ]; then
+    ltype="-l U"
+else
+    ltype="-l SF"
+fi
 if [ "${force}" = true ] || [ ! -f ${sm_out} ]; then
     echo "running salmon quant..."
-    salmon quant -t ${transcript_fa} -l U -a ${rna_bam} -o ${sm_odir} -p $nproc --bias_correct
+    salmon quant -t ${transcript_fa} ${ltype} -a ${rna_bam} -o ${sm_odir} -p $nproc --bias_correct
     check_file ${sm_out} "pipeline failed at expression quantification!"
 fi
 #============================================
@@ -287,6 +299,9 @@ if [ ! -z "${cds_range}" ] && [ -f ${cds_range} ]; then
 fi
 if [ "${useSecondary}" = true ]; then
     options+=" --useSecondary"
+fi
+if [ "${useRC}" = true ]; then
+    options+=" --useRC"
 fi
 if [ "${force}" = true ] || [ ! -f ${ribomap_out}.base ]; then
     echo "running riboprof..."
