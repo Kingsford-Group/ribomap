@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <numeric>
+#include <algorithm>
 #include <string>
 
 #include "ezOptionParser.hpp"
@@ -150,11 +151,13 @@ bool readmapper_pipeline(const transcript_info& tinfo, const char* mRNA_bam, con
   cout<<"assigning reads..."<<endl;
   if (not mprofile.assign_reads(fp_rec,unordered_set<int>{UTR5, FRAME0, FRAME1, FRAME2, UTR3}))
     cout<<"total input count not matching total assigning count!"<<endl;
-  cout<<"rank transcripts..."<<endl;
-  abundance_rank rank(rprofile, tinfo);
-  rank.get_rank(100);
-  rank.write_diff_list(log_prefix, 10);
   cout<<"write profile results..."<<endl;
   generate_profile_report(log_prefix, rprofile, mprofile, tinfo);
+  cout<<"rank transcripts..."<<endl;
+  abundance_rank rank(rprofile, tinfo);
+  cout<<"transcripts in rank list: "<<rank.size()<<endl;
+  int rank_size = std::max(int(rank.size()), 100);
+  rank.get_rank(100);
+  rank.write_diff_list(log_prefix, 10);
   return false;
 }

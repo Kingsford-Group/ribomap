@@ -17,11 +17,12 @@ struct transcript_rank {
 
 class abundance_rank {
 public:
-  std::vector<transcript_rank> tlist;
+  const size_t size() const { return tlist.size(); }
   abundance_rank(const ribo_profile& rprofile, const transcript_info& tinfo);
   void get_rank(int bin_num);
   void write_diff_list(const string& file_core, int percent_diff);
 private:
+  std::vector<transcript_rank> tlist;
   void rank_by_tabd(int bin_num);
   void rank_by_rabd(int bin_num);
   void sort_by_rank_diff();

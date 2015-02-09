@@ -20,6 +20,9 @@ abundance_rank::abundance_rank(const ribo_profile& rprofile, const transcript_in
     // if (std::fabs(rabd - rabd_sum)/rabd_original > 1e-3) {
     //   cout<<"accumulate abundance not equal tot_count! "<<rabd<<" "<<rprofile.get_tot_count(t)<<" "<<t<<endl;
     // }
+    // if no ribosome footprint counts on any location > 1
+    // or if no ribosome footprint counts on more than 2 loci > 0
+    // don't consider ranking it
     if ((not have_spike(p)) or (not have_multiple_spikes(p))) continue;
     string tid = tinfo.get_tid(refID_vec[t]);
     double tabd = rprofile.get_tot_abundance(t)*rprofile.len(t);
