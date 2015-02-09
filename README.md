@@ -46,7 +46,7 @@ The list of options are as follows:
 * __--nproc__ (default 15) Number of threads can be used by ribomap.
 * __--adapter__ (default `CTGTAGGCACCATCAAT`) The linker sequence attached to the 5' end of the ribo-seq reads.
 * __--nmismatch__ (default 1) Number of mismatches allowed in the read alignments.
-* __softClipping__ (default `true`) Whether reads are allowed to be soft-clipped by STAR when aligning to the transcriptome.
+* __--softClipping__ (default `true`) Whether reads are allowed to be soft-clipped by STAR when aligning to the transcriptome.
 * __--min_fplen__ (default 27) Minimun read length to keep for downstream analysis.
 * __--max_fplen__ (default 33) Maximum riboseq read length to keep for downstream analysis.
 * __--offset__ (default 12) Offset location in a read that the ribosome P-site maps to, or a text file name that defines the P-site offset based on read length (see description below).
