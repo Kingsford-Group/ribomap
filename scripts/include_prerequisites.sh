@@ -3,6 +3,7 @@ cur_dir=`dirname $0`
 pkg_dir=${cur_dir}/../pkg/
 bin_dir=${cur_dir}/../bin/
 lib_dir=${cur_dir}/../lib/
+mkdir -p ${pkg_dir}
 mkdir -p ${bin_dir}
 mkdir -p ${lib_dir}
 echo "downloading Saifish..."
