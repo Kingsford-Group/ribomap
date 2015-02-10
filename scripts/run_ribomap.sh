@@ -19,11 +19,6 @@ offset=12 # P-site offset
 # pre-filled parameters
 #=============================
 src_dir=`dirname $0`
-bin_dir=${src_dir}/../bin/
-lib_dir=${src_dir}/../lib/
-export PATH=${bin_dir}:$PATH
-export LD_LIBRARY_PATH=${lib_dir}:$LD_LIBRARY_PATH
-export DYLD_LIBRARY_PATH=${lib_dir}:$DYLD_LIBRARY_PATH
 work_dir=${src_dir}/../
 # star index
 star_idx_dir=${work_dir}StarIndex/

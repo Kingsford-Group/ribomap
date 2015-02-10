@@ -23,5 +23,8 @@ tar -zxvf ${star_tarball} -C ${pkg_dir}
 echo "copying star executable to bin/"
 star_dir=${pkg_dir}STAR-STAR_2.4.0h1
 cp ${star_dir}/bin/Linux_x86_64/* ${bin_dir}
+echo "export PATH..."
+export PATH=${bin_dir}:$PATH
+export LD_LIBRARY_PATH=${lib_dir}:$LD_LIBRARY_PATH
 echo "done"
 
