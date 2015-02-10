@@ -1,10 +1,17 @@
 #!/bin/bash
+cd ../src
+make riboprof
+make install
 mkdir -p ../../ribomap-linux/
-mkdir -p ../../ribomap-linux/data
-mkdir -p ../../ribomap-linux/src
-cp ribomap merge_fq_to_fa run_ribomap.sh get_data.sh transcript_codon_check.py transcript_filter.py ../../ribomap-linux/src
-cp ../README.md ../../ribomap-linux/
-cp ../data/rrna_human.fasta ../../ribomap-linux/data
+ribomap_dir=../../ribomap-linux/
+scripts="run_ribomap.sh include_prerequisites.sh hela_ribo_analysis.sh offset.txt build_contaminant.py filter_gencode_transcript.py translation.py"
+cp -r ../bin ${ribomap_dir}
+cp -r ../lib ${ribomap_dir}
+mkdir -p ${ribomap_dir}scripts
+for s in scripts; do
+    cp ../scripts/$s ${ribomap_dir}scripts
+done
+cp ../README.md ${ribomap_dir}
 cd ../../
 tar -cvzf ribomap-linux.tar.gz ribomap-linux
 rm -r ribomap-linux
