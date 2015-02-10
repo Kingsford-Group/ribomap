@@ -8,8 +8,8 @@ scripts="run_ribomap.sh include_prerequisites.sh hela_ribo_analysis.sh offset.tx
 cp -r ../bin ${ribomap_dir}
 cp -r ../lib ${ribomap_dir}
 mkdir -p ${ribomap_dir}scripts
-for s in scripts; do
-    cp ../scripts/$s ${ribomap_dir}scripts
+for s in ${scripts}; do
+    echo "cp ../scripts/$s ${ribomap_dir}scripts"
 done
 cp ../README.md ${ribomap_dir}
 cd ../../
