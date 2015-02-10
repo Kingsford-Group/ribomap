@@ -1,6 +1,6 @@
 #!/bin/bash
 src_dir=`dirname $0`
-ribomap_dir=src_dir/../
+ribomap_dir=${src_dir}/../
 work_dir=${ribomap_dir}
 fasta_dir=${work_dir}data/fasta/
 ref_dir=${work_dir}ref/
