@@ -40,7 +40,7 @@ The list of options are as follows:
 * __--rnaseq_fq__ (required) Input RNA-seq read fastq.gz file for transcript abundance estimation.
 * __--riboseq_fq__ (required) Input ribosome profiling (riboseq) read fastq.gz file.
 * __--transcript_fa__ (required) Input trascriptome reference fasta file.
-* __--contaminant_fa__ Input contaminant sequence fasta file (human ribosome RNA sequences are included in directory `data`).
+* __--contaminant_fa__ Input contaminant sequence fasta file.
 * __--cds_range__ A text file that includes the coding sequence (CDS) range for all transcripts (see description below). If such an option is not provided, the transcript fasta file is assume to only include the CDS regions.
 * __--work_dir__ (default the parent directory of `scripts`) The working directory where all intermediate and final results will write to.
 * __--nproc__ (default 15) Number of threads can be used by ribomap.

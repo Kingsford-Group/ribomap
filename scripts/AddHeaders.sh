@@ -56,7 +56,7 @@ for i in ${directory}/${pattern}
 do
   if ! grep -q Copyright $i
   then
-    cat ${license} $i >$i.new && mv $i $i.bak && mv $i.new $i
+    cat ${license} $i >$i.new && mv $i.new $i #&& mv $i $i.bak && mv $i.new $i
   fi
 done
 
