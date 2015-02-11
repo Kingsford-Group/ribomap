@@ -7,8 +7,15 @@ Prerequisites for Ribomap
 <!---
 * [__FASTX-Toolkit__] (http://hannonlab.cshl.edu/fastx_toolkit/index.html) for preprocessing reads
 -->
-* [__Sailfish__ (latest improved version: Salmon v0.2.3)](https://github.com/kingsfordgroup/sailfish/releases/tag/v0.2.3) for transcript abundance estimation
-* [__STAR__ (v2.4.0h)](https://github.com/alexdobin/STAR/releases/tag/STAR_2.4.0h1) for read mapping
+* [__Sailfish__ (latest improved version: Salmon v0.2.7)](https://github.com/kingsfordgroup/sailfish/releases/tag/v0.2.7) for transcript abundance estimation
+* [__STAR__ (v2.4.0j)](https://github.com/alexdobin/STAR/releases/tag/STAR_2.4.0j) for read mapping
+
+You can use `include_prerequisites.sh` in the `scripts` folder to download the pre-compiled Sailfish and STAR executables from the github page. 
+
+    cd scripts
+    ./include_prerequisites.sh os_type
+
+Where `os_type` can be either `linux` or `osx`.
 
 Compile from Source code
 ------
@@ -176,7 +183,7 @@ The file format is the same as _XXX_abundant.list_.
 Test case
 ------
 ### Run test case
-under the `script` directory, run:
+under the `scripts` directory, run:
 
       ./hela_ribo_analysis.sh
 
