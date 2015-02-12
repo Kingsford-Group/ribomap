@@ -80,7 +80,7 @@ filter_reads ()
 {
     if [ "${force}" = true ] || [ ! -f "$3" ];  then
 	if [ "${1##*.}" = gz ]; then
-	    filter_params="--readFilesCommand zcat "${align_params}
+	    filter_params="--readFilesCommand zcat < "${align_params}
 	else
 	    filter_params=${align_params}
 	fi
