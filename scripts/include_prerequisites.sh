@@ -16,7 +16,7 @@ elif [ "$os" = osx ]; then
     salmon_dir=${salmon_dir%.tar.gz}
 else
     echo "Usage: ./include_prerequisites.sh os_type"
-    echo "os_type=[ linux | osx ]"
+    echo "os_type = [ linux | osx ]"
     exit
 fi
 echo "downloading Saifish..."
