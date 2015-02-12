@@ -16,7 +16,7 @@ mkdir -p ${odir}
 scripts="run_ribomap.sh include_prerequisites.sh hela_ribo_analysis.sh offset.txt build_contaminant.py filter_gencode_transcript.py translation.py"
 cp -r ../bin ${odir}
 cp -r ../lib ${odir}
-mkdir -p ${odir}scripts
+mkdir -p ${odir}/scripts
 for s in ${scripts}; do
     cp ../scripts/$s ${odir}/scripts
 done
