@@ -20,7 +20,7 @@ else
 fi
 echo "downloading Saifish..."
 salmon_tarball=${pkg_dir}${salmon_url##*/}
-wget -P ${pkg_dir} --no-check-certificate ${salmon_url} -N
+wget -P ${pkg_dir} --no-check-certificate -N ${salmon_url}
 tar -zxvf ${salmon_tarball} -C ${pkg_dir}
 echo "copying Sailfish executables and libraries to bin/ lib/"
 cp ${salmon_dir}/bin/* ${bin_dir}
@@ -28,7 +28,7 @@ cp ${salmon_dir}/lib/* ${lib_dir}
 echo "downloading Star..."
 star_url=https://github.com/alexdobin/STAR/archive/STAR_2.4.0j.tar.gz
 star_tarball=${pkg_dir}${star_url##*/}
-wget -P ${pkg_dir} --no-check-certificate ${star_url} -N
+wget -P ${pkg_dir} --no-check-certificate -N ${star_url}
 tar -zxvf ${star_tarball} -C ${pkg_dir}
 star_dir=${pkg_dir}STAR-${star_url##*/}
 star_dir=${star_dir%.tar.gz}
