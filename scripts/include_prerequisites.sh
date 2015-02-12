@@ -12,7 +12,8 @@ if [ "$os" = linux ]; then
     salmon_dir=${pkg_dir}SalmonBeta-latest_ubuntu-12.04
 elif [ "$os" = osx ]; then
     salmon_url=https://github.com/kingsfordgroup/sailfish/releases/download/v0.2.7/Salmon-v0.2.7_MacOSX-10.10.1.tar.gz
-    salmon_dir=${salmon_tarball%.tar.gz}
+    salmon_dir=${pkg_dir}${salmon_url##*/}
+    salmon_dir=${salmon_dir%.tar.gz}
 else
     echo "Usage: ./include_prerequisites.sh os_type"
     echo "os_type=[ linux | osx ]"
