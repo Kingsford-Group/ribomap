@@ -30,7 +30,7 @@ Compile from Source code
 * [seqan (v1.4.1)](http://www.seqan.de/)
 
 ### Compile
-a c++ compiler that support c++11 features (for instance g++ >= 4.7) is required.
+a C++ compiler that support c++11 features (for instance g++ >= 4.7) is required.
 
     cd src
     make riboprof INC="-I/opt/local/include"
@@ -54,7 +54,7 @@ The list of options are as follows:
 * __--riboseq_fq__ (required) Input ribosome profiling (riboseq) read fastq.gz file.
 * __--transcript_fa__ (required) Input trascriptome reference fasta file.
 * __--contaminant_fa__ Input contaminant sequence fasta file.
-* __--cds_range__ A text file that includes the coding sequence (CDS) range for all transcripts (see description below). If such an option is not provided, the transcript fasta file is assume to only include the CDS regions.
+* __--cds_range__ A text file that includes the coding sequence (CDS) range for all transcripts (see description below). If such an option is not provided, the transcript fasta file is assumed to only include the CDS regions.
 * __--work_dir__ (default the parent directory of `scripts`) The working directory where all intermediate and final results will write to.
 * __--nproc__ (default 15) Number of threads can be used by ribomap.
 * __--adapter__ (default `CTGTAGGCACCATCAAT`) The linker sequence attached to the 5' end of the ribo-seq reads.
@@ -189,7 +189,7 @@ The file format is the same as _XXX_abundant.list_.
 Test case
 ------
 ### Run test case
-under the `scripts` directory, run:
+Under the `scripts` directory, run:
 
       ./hela_ribo_analysis.sh
 
