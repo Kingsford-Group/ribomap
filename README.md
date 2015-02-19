@@ -17,7 +17,7 @@ You can use `include_prerequisites.sh` in the `scripts` folder to download the p
 
 Where `os_type` can be either `linux` or `osx`.
 
-If you download the Ribomap binaries from the [release page](https://github.com/Kingsford-Group/ribomap/releases/tag/v1.0), STAR and Salmon executables and libraries are already included in the tar ball. 
+If you download the Ribomap binaries from the [release page](https://github.com/Kingsford-Group/ribomap/releases), STAR and Salmon executables and libraries are already included in the tar ball. 
 
 Please make sure that the `PATH` variabile contains `<ribomap_dir>/bin`, and that `LD_LIBRARY_PATH` (or `DYLD_FALLBACK_LIBRARY_PATH` on OSX) contains `<ribomap_dir>/lib`.
 
