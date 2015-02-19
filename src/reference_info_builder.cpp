@@ -118,6 +118,8 @@ bool transcript_info::get_info_from_fasta(const char* tfname)
       return 1;
     }
     string tid(toCString(theader));
+    size_t i(tid.find_first_of(" \t"));
+    tid = tid.substr(0,i);
     int tlen = length(tseq);
     int start(0), end(tlen); // end position have to pass over the last position
     end -= (end-start)%3; 
