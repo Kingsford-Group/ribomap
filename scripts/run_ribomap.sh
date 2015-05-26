@@ -39,9 +39,8 @@ offset=12 # P-site offset
 # pre-filled parameters
 #=============================
 src_dir=`dirname $0`
-work_dir=${src_dir}/../
-bin_dir=${cur_dir}/../bin/
-lib_dir=${cur_dir}/../lib/
+bin_dir=${src_dir}/../bin/
+lib_dir=${src_dir}/../lib/
 export PATH=${bin_dir}:$PATH
 export LD_LIBRARY_PATH=${lib_dir}:$LD_LIBRARY_PATH
 export DYLD_FALLBACK_LIBRARY_PATH=${lib_dir}:$DYLD_FALLBACK_LIBRARY_PATH
