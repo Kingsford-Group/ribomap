@@ -305,6 +305,7 @@ else
 fi
 if [ "${force}" = true ] || [ ! -f ${sm_out} ]; then
     echo "running salmon quant..."
+    mkdir -p ${sm_odir}
     salmon quant -t ${transcript_fa} ${ltype} -a ${rna_bam} -o ${sm_odir} -p $nproc --biasCorrect
     check_file ${sm_out} "pipeline failed at expression quantification!"
 fi
