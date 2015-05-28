@@ -265,7 +265,7 @@ if [ ! -z "${contaminant_fa}" ] && [ -f ${contaminant_fa} ]; then
     if [ "${force}" = true ] || [ ! -d ${rrna_idx} ];  then
 	echo "building contaminant index..."
 	mkdir -p ${rrna_idx}
-	STAR --runThreadN $nproc --runMode genomeGenerate --genomeDir ${rrna_idx} --genomeFastaFiles ${contaminant_fa} --genomeSAindexNbases 5 --genomeChrBinNbits 11
+	STAR --runThreadN $nproc --runMode genomeGenerate --genomeDir ${rrna_idx} --genomeFastaFiles ${contaminant_fa} --genomeSAindexNbases 8 --genomeChrBinNbits 11
     fi
     echo "filtering contaminants in RNA_seq..."
     filter_reads ${rnaseq_fq} ${ornaprefix} ${rna_nrrna_fa}
