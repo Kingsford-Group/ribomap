@@ -9,16 +9,19 @@ mkdir -p ${lib_dir}
 os=$1
 if [ "$os" = linux ]; then
     salmon_url=https://github.com/COMBINE-lab/salmon/releases/download/v0.6.0/SalmonBeta-0.6.0_DebianSqueeze.tar.gz
+salmon_dir=${pkg_dir}SalmonBeta-0.6.1_DebianSqueeze
+salmon_dir=${salmon_dir%.tar.gz}
+
 elif [ "$os" = osx ]; then
     salmon_url=https://github.com/COMBINE-lab/salmon/releases/download/v0.6.0/SalmonBeta-0.6.0_OSX_10.11.tar.gz
+    salmon_dir=${pkg_dir}${salmon_url##*/}
+    salmon_dir=${salmon_dir%.tar.gz}
+
 else
     echo "Usage: ./include_prerequisites.sh os_type"
     echo "os_type = [ linux | osx ]"
     exit
 fi
-salmon_dir=${pkg_dir}${salmon_url##*/}
-salmon_dir=${salmon_dir%.tar.gz}
-echo ${salmon_dir}
 echo "downloading Salmon..."
 salmon_tarball=${pkg_dir}${salmon_url##*/}
 wget -P ${pkg_dir} --no-check-certificate -N ${salmon_url}
