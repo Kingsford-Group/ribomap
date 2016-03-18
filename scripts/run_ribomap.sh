@@ -39,8 +39,9 @@ offset=12 # P-site offset
 # pre-filled parameters
 #=============================
 src_dir=`dirname $0`
-bin_dir=${src_dir}/../bin/
-lib_dir=${src_dir}/../lib/
+work_dir=${src_dir}/../
+bin_dir=${work_dir}bin/
+lib_dir=${work_dir}lib/
 export PATH=${bin_dir}:$PATH
 export LD_LIBRARY_PATH=${lib_dir}:$LD_LIBRARY_PATH
 export DYLD_FALLBACK_LIBRARY_PATH=${lib_dir}:$DYLD_FALLBACK_LIBRARY_PATH
@@ -297,7 +298,7 @@ align_reads ${ribo_nrrna_fa} ${oriboprefix} ${ribo_bam}
 #============================================
 # step 3: salmon expression quantification
 #============================================
-sm_out=${sm_odir}/quant_bias_corrected.sf
+sm_out=${sm_odir}/quant.sf
 if [ "${useRC}" = true ]; then
     ltype="-l U"
 else

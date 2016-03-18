@@ -8,22 +8,22 @@ mkdir -p ${bin_dir}
 mkdir -p ${lib_dir}
 os=$1
 if [ "$os" = linux ]; then
-    salmon_url=https://github.com/kingsfordgroup/sailfish/releases/download/v0.2.7/Salmon-v0.2.7_Ubuntu-12.04.tar.gz
-    salmon_dir=${pkg_dir}SalmonBeta-latest_ubuntu-12.04
+    salmon_url=https://github.com/COMBINE-lab/salmon/releases/download/v0.6.0/SalmonBeta-0.6.0_DebianSqueeze.tar.gz
 elif [ "$os" = osx ]; then
-    salmon_url=https://github.com/kingsfordgroup/sailfish/releases/download/v0.2.7/Salmon-v0.2.7_MacOSX-10.10.1.tar.gz
-    salmon_dir=${pkg_dir}${salmon_url##*/}
-    salmon_dir=${salmon_dir%.tar.gz}
+    salmon_url=https://github.com/COMBINE-lab/salmon/releases/download/v0.6.0/SalmonBeta-0.6.0_OSX_10.11.tar.gz
 else
     echo "Usage: ./include_prerequisites.sh os_type"
     echo "os_type = [ linux | osx ]"
     exit
 fi
-echo "downloading Saifish..."
+salmon_dir=${pkg_dir}${salmon_url##*/}
+salmon_dir=${salmon_dir%.tar.gz}
+echo ${salmon_dir}
+echo "downloading Salmon..."
 salmon_tarball=${pkg_dir}${salmon_url##*/}
 wget -P ${pkg_dir} --no-check-certificate -N ${salmon_url}
 tar -zxvf ${salmon_tarball} -C ${pkg_dir}
-echo "copying Sailfish executables and libraries to bin/ lib/"
+echo "copying Salmon executables and libraries to bin/ lib/"
 cp ${salmon_dir}/bin/* ${bin_dir}
 cp ${salmon_dir}/lib/* ${lib_dir}
 echo "downloading Star..."

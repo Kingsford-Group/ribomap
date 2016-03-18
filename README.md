@@ -7,7 +7,7 @@ Prerequisites for Ribomap
 <!---
 * [__FASTX-Toolkit__] (http://hannonlab.cshl.edu/fastx_toolkit/index.html) for preprocessing reads
 -->
-* [__Sailfish__ (latest improved version: Salmon v0.2.7)](https://github.com/kingsfordgroup/sailfish/releases/tag/v0.2.7) for transcript abundance estimation
+* [__Sailfish/Salmon__ (latest version: Salmon v0.6.0)](https://github.com/COMBINE-lab/salmon/releases/tag/v0.6.0) for transcript abundance estimation
 * [__STAR__ (v2.4.0j)](https://github.com/alexdobin/STAR/releases/tag/STAR_2.4.0j) for read mapping
 
 You can use `include_prerequisites.sh` in the `scripts` folder to download the pre-compiled Sailfish and STAR executables from the github page. 

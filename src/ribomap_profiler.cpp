@@ -59,8 +59,10 @@ void ribo_profile::sailfish_parser(const transcript_info& tinfo, const char* sf_
 {
   rid_t pid(0);
   ifstream ifile(sf_fname);
+  // hard coded ignore first line
+  string line;
+  getline(ifile,line);
   while(ifile.peek() == '#'){
-    string line;
     getline(ifile,line);
   }
   string word, tid;
@@ -78,8 +80,8 @@ void ribo_profile::sailfish_parser(const transcript_info& tinfo, const char* sf_
       // else
       // 	tid = word;
     }
-    // 3rd column: transcript abundance (tpm: transcript per million)
-    else if (i==3) {
+    // 4th column: transcript abundance (tpm: transcript per million)
+    else if (i==4) {
       try { tpm = std::stod(word); }
       catch (const std::out_of_range& oor) { tpm = 0; }
       ifile.ignore(numeric_limits<streamsize>::max(), '\n');
